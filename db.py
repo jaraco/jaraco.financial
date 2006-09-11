@@ -1,42 +1,26 @@
 from ZODB import FileStorage, DB
 import ZODB.config
+import ZEO.ClientStorage
 import os, operator
-
-import logging
-logging.basicConfig( level = logging.DEBUG )
-
-root = os.path.join( os.environ['APPDATA'], 'jaraco', 'SUMMS' )
-current = os.path.dirname( __file__ )
-conf = os.path.join( current, 'summs.conf' )
-if not os.path.isdir( root ): os.makedirs( root )
-
-db = ZODB.config.databaseFromURL( conf )
-
-conn = db.open()
-
-dbroot = conn.root()
+import transaction
 
 from BTrees.OOBTree import OOBTree
 from BTrees.OOBTree import OOSet
 
-dbname = 'summs'
+current = os.path.dirname( __file__ )
 
-summsdb = dbroot.setdefault( dbname, OOBTree() )
-
-from persistent import Persistent
-
-class Transaction( Persistent ):
-	def __init__( self ):
-		self.x = 'foo'
-
-
-import transaction
-
-def AddSample():
-	sample_t = Transaction()
-	sample_t.y = 'bar'
-	summsdb[ sample_t.x ] = sample_t
-	transaction.get().commit()
+def GetDatabase( ):
+	"""Get the summs database.  Uses summs.conf in the current directory.  DB will be created
+	if it doesn't exist."""
+	#root = os.path.join( os.environ['APPDATA'], 'jaraco', 'SUMMS' )
+	#if not os.path.isdir( root ): os.makedirs( root )
+	conf = os.path.join( current, 'summs.conf' )
+	db = ZODB.config.databaseFromURL( conf )
+	conn = db.open()
+	dbroot = conn.root()
+	dbname = 'summs'
+	summsdb = dbroot.setdefault( dbname, OOBTree() )
+	return summsdb
 
 from importer import *
 from persistent.mapping import PersistentMapping
@@ -77,4 +61,3 @@ def CleanNone( ob ):
 		for key in item.keys():
 			if item[key] is None:
 				del item[key]
-				
