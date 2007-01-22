@@ -4,8 +4,8 @@ now = datetime.datetime.now
 
 from persistent import Persistent
 
-from db import GetDatabase
-db = db.GetDatabase()
+import db
+_db = db.GetDatabase()
 
 class Entry( Persistent ):
 	"""This is a 'side' of a transaction.  It is an expense, an income, or
@@ -26,10 +26,10 @@ class Entry( Persistent ):
 		self.time_entered = now()
 
 	def validate( self ):
-		assert self.getattr( 'recipient' ) or self.getattr( 'donor' )
-		assert self.getattr( 'source' ) or self.getattr( 'destination' )
-		assert self.getattr( 'amount' ) is not None
-		if self.getattr( 'amount' ) == 0: self.warn( 'amount is zero' )
+		assert hasattr( self, 'recipient' ) or hasattr( self, 'donor' )
+		assert hasattr( self, 'source' ) or hasattr( self, 'destination' )
+		assert hasattr( self, 'amount' ) is not None
+		if hasattr( self, 'amount' ) == 0: self.warn( 'amount is zero' )
 		
 	def warn( self, msg ):
 		print 'warning:', msg

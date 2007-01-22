@@ -12,15 +12,15 @@ current = os.path.dirname( __file__ )
 def GetDatabase( ):
 	"""Get the summs database.  Uses summs.conf in the current directory.  DB will be created
 	if it doesn't exist."""
-	#root = os.path.join( os.environ['APPDATA'], 'jaraco', 'SUMMS' )
-	#if not os.path.isdir( root ): os.makedirs( root )
-	conf = os.path.join( current, 'summs.conf' )
-	db = ZODB.config.databaseFromURL( conf )
-	conn = db.open()
-	dbroot = conn.root()
-	dbname = 'summs'
-	summsdb = dbroot.setdefault( dbname, OOBTree() )
-	return summsdb
+	global _dbobj
+	if not '_dbobj' in globals():
+		conf = os.path.join( current, 'summs.conf' )
+		db = ZODB.config.databaseFromURL( conf )
+		conn = db.open()
+		dbroot = conn.root()
+		dbname = 'summs'
+		_dbobj = dbroot.setdefault( dbname, OOBTree() )
+	return _dbobj
 
 from importer import *
 from persistent.mapping import PersistentMapping
@@ -39,25 +39,38 @@ def ImportMoney():
 	transaction.commit()
 
 # gen purpose
-def CreateSet( target_ob, target_name, orig_set, attr_name ):
+def SaveCreatedSet( target_ob, target_name, orig_set, attr_name ):
+	"""in the target object called target_name
+	e.g. SaveCreatedSet( summsdb, 'Categories', LatestImport(), 'Category' )
+	"""
+	target_ob[target_name] = CreateSet( orig_set, attr_name )
+	
+def CreateSet( orig_set, attr_name ):	
 	"""Take an attribute from the original set of items and create
-	a set in the target object called target_name that contains
-	unique copies of the attribute from the original set.
-	e.g. CreateSet( summsdb, 'Categories', LatestImport(), 'Category' )"""
+	a set that contains
+	unique copies of the attribute from the original set."""
 	set = OOSet()
 	orig_set = itertools.ifilter( lambda o: attr_name in o, orig_set )
 	items = itertools.imap( operator.itemgetter( attr_name ), orig_set )
 	ExtendSet( set, items )
-	target_ob[ target_name ] = set
+	return set
 
 def ExtendSet( set, items ):
 	map( set.insert, items )
 
 def LatestImport( ):
-	return summsdb['imported'][ summsdb['imported'].maxKey() ]
+	db = GetDatabase()
+	return db['imported'][ db['imported'].maxKey() ]
 
 def CleanNone( ob ):
 	for item in ob:
 		for key in item.keys():
 			if item[key] is None:
 				del item[key]
+
+def GetTransfers( imported = None ):
+	if imported is None: imported = LatestImport()
+	accounts = GetDatabase()['Accounts']
+	imported = itertools.ifilter( lambda t: 'Subcategory' in t, imported )
+	return itertools.ifilter( lambda t: t['Category'] == 'Transfer', imported )
+
