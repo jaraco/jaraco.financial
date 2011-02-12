@@ -29,3 +29,32 @@ def fix_dates_cmd():
 	filename = args.pop()
 	if args: parser.error("Unexpected parameter")
 	inline_sub(filename)
+
+def DALS(str):
+	"dedent and left strip"
+	return textwrap.dedent(str).lstrip()
+
+import textwrap
+from jaraco.util.dictlib import DictAdapter
+
+class Transaction(object):
+	fmt = DALS("""
+		!Type:{type}
+		D{qif_date}
+		T{amount}
+		""")
+
+	def _as_mapping(self):
+		return DictAdapter(self)
+
+class InvestmentTransaction(Transaction):
+	fmt = Transaction.fmt + DALS("""
+		N{inv_type}
+		Y{fund}
+		I{price}
+		Q{quantity}
+		^
+		""")
+
+	def qif_str(self):
+		return self.fmt.format(self._as_mapping())
