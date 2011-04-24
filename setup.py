@@ -16,7 +16,7 @@ name = 'jaraco.financial'
 
 setup(
 	name = name,
-	use_hg_version_increment='0.1',
+	use_hg_version = dict(increment='0.1'),
 	description = 'Financial tools by jaraco',
 	author = 'Jason R. Coombs',
 	author_email = 'jaraco@jaraco.com',
@@ -33,7 +33,8 @@ setup(
 	entry_points = {
 		'console_scripts': [
 			'fix-qif-date-format = jaraco.financial.qif:fix_dates_cmd',
-			],
+			'launch-in-money = jaraco.financial.msmoney:launch',
+		],
 	},
 	install_requires=[
 	],
