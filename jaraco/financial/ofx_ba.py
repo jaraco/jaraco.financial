@@ -11,7 +11,14 @@ sites = {
 			"fiorg": "MyCreditUnion", 
 			"url": "https://ofx.mycreditunion.org",
 			"bankid": "21325412453", # bank routing #
-		}	
+		},
+		"SLFCU": {
+                	"caps": [ "SIGNON", "BASTMT" ],
+			"fid": "1001",     # ^- this is what i added, for checking/savings/debit accounts- think "bank statement"
+			"fiorg": "SLFCU", 
+			"url": "https://www.cu-athome.org/scripts/serverext.dll",
+			"bankid": "307083911", # bank routing #
+		},	
    }
 												
 def _field(tag,value):
