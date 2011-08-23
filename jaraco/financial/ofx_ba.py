@@ -1,5 +1,9 @@
 #!/usr/bin/python
-import time, os, httplib, urllib2
+import time
+import os
+import httplib
+import urllib2
+import uuid
 import sys
 
 join = str.join
@@ -8,19 +12,19 @@ sites = {
 		"MYCreditUnion": {
                 	"caps": [ "SIGNON", "BASTMT" ],
 			"fid": "31337",     # ^- this is what i added, for checking/savings/debit accounts- think "bank statement"
-			"fiorg": "MyCreditUnion", 
+			"fiorg": "MyCreditUnion",
 			"url": "https://ofx.mycreditunion.org",
 			"bankid": "21325412453", # bank routing #
 		},
 		"SLFCU": {
                 	"caps": [ "SIGNON", "BASTMT" ],
 			"fid": "1001",     # ^- this is what i added, for checking/savings/debit accounts- think "bank statement"
-			"fiorg": "SLFCU", 
+			"fiorg": "SLFCU",
 			"url": "https://www.cu-athome.org/scripts/serverext.dll",
 			"bankid": "307083911", # bank routing #
-		},	
+		},
    }
-												
+
 def _field(tag,value):
     return "<"+tag+">"+value
 
@@ -31,7 +35,7 @@ def _date():
     return time.strftime("%Y%m%d%H%M%S",time.localtime())
 
 def _genuuid():
-    return os.popen("uuidgen").read().rstrip().upper()
+    return uuid.uuid4().hex
 
 class OFXClient:
     """Encapsulate an ofx client, config is a dict containg configuration"""
@@ -83,7 +87,7 @@ class OFXClient:
 		   	_field("DTSTART",dtstart),
 			_field("INCLUDE","Y")))
 	return self._message("BANK","STMT",req)
-	
+
     def _ccreq(self, acctid, dtstart):
         config=self.config
         req = _tag("CCSTMTRQ",
@@ -116,7 +120,7 @@ class OFXClient:
                          _field("TRNUID",_genuuid()),
                          _field("CLTCOOKIE",self._cookie()),
                          request))
-    
+
     def _header(self):
         return join("\r\n",[ "OFXHEADER:100",
                            "DATA:OFXSGML",
@@ -135,7 +139,7 @@ class OFXClient:
  	                  _tag("OFX",
                                 self._signOn(),
                                 self._bareq(acctid, dtstart, accttype))])
-						
+
     def ccQuery(self, acctid, dtstart):
         """CC Statement request"""
         return join("\r\n",[self._header(),
@@ -166,14 +170,14 @@ class OFXClient:
             f = urllib2.urlopen(request)
             response = f.read()
             f.close()
-            
+
             f = file(name,"w")
             f.write(response)
             f.close()
 	else:
             print request
             print self.config["url"], query
-        
+
         # ...
 
 import getpass
@@ -189,7 +193,7 @@ if __name__=="__main__":
     client = OFXClient(sites[argv[1]], argv[2], passwd)
     if len(argv) < 4:
        query = client.acctQuery("19700101000000")
-       client.doQuery(query, argv[1]+"_acct.ofx") 
+       client.doQuery(query, argv[1]+"_acct.ofx")
     else:
        if "CCSTMT" in sites[argv[1]]["caps"]:
           query = client.ccQuery(sys.argv[3], dtstart)

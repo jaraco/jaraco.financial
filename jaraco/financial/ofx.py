@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import time, os, httplib, urllib2
+import time, os, httplib, urllib2, uuid
 import sys
 
 join = str.join
@@ -21,7 +21,7 @@ sites = {
                  "caps": [ "SIGNON", "INVSTMT" ],
                 "fiorg": "ameritrade.com",
                   "url": "https://ofx.ameritrade.com/ofxproxy/ofx_proxy.dll",
-                } 
+                }
     }
 
 def _field(tag,value):
@@ -34,7 +34,7 @@ def _date():
     return time.strftime("%Y%m%d%H%M%S",time.localtime())
 
 def _genuuid():
-    return os.popen("uuidgen").read().rstrip().upper()
+    return uuid.uuid4().hex
 
 class OFXClient:
     """Encapsulate an ofx client, config is a dict containg configuration"""
@@ -106,7 +106,7 @@ class OFXClient:
                          _field("TRNUID",_genuuid()),
                          _field("CLTCOOKIE",self._cookie()),
                          request))
-    
+
     def _header(self):
         return join("\r\n",[ "OFXHEADER:100",
                            "DATA:OFXSGML",
@@ -149,14 +149,14 @@ class OFXClient:
             f = urllib2.urlopen(request)
             response = f.read()
             f.close()
-            
+
             f = file(name,"w")
             f.write(response)
             f.close()
 	else:
             print request
             print self.config["url"], query
-        
+
         # ...
 
 import getpass
@@ -172,7 +172,7 @@ if __name__=="__main__":
     client = OFXClient(sites[argv[1]], argv[2], passwd)
     if len(argv) < 4:
        query = client.acctQuery("19700101000000")
-       client.doQuery(query, argv[1]+"_acct.ofx") 
+       client.doQuery(query, argv[1]+"_acct.ofx")
     else:
        if "CCSTMT" in sites[argv[1]]["caps"]:
           query = client.ccQuery(sys.argv[3], dtstart)
