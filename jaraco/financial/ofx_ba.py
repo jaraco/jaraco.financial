@@ -7,8 +7,9 @@ import uuid
 import sys
 import argparse
 import getpass
+import itertools
 
-join = str.join
+from jaraco.util.string import local_format as lf
 
 sites = {
 	"SLFCU": {
@@ -20,14 +21,17 @@ sites = {
 	},
 }
 
-def _field(tag,value):
-	return "<"+tag+">"+value
+def _field(tag, value):
+	return lf('<{tag}>{value}')
 
-def _tag(tag,*contents):
-	return join("\r\n",["<"+tag+">"]+list(contents)+["</"+tag+">"])
+def _tag(tag, *contents):
+	start_tag = lf('<{tag}>')
+	end_tag = lf('</{tag}>')
+	lines = itertools.chain([start_tag], contents, [end_tag])
+	return '\r\n'.join(lines)
 
 def _date():
-	return time.strftime("%Y%m%d%H%M%S",time.localtime())
+	return time.strftime("%Y%m%d%H%M%S", time.localtime())
 
 def _genuuid():
 	return uuid.uuid4().hex
