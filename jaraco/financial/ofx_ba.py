@@ -8,6 +8,7 @@ import sys
 import argparse
 import getpass
 import itertools
+import collections
 
 from jaraco.util.string import local_format as lf
 
@@ -36,8 +37,19 @@ def _date():
 def _genuuid():
 	return uuid.uuid4().hex
 
-class OFXClient:
-	"""Encapsulate an ofx client, config is a dict containg configuration"""
+AppInfo = collections.namedtuple('AppInfo', 'id version')
+
+class OFXClient(object):
+	"""
+	Encapsulate an ofx client, config is a dict containg configuration.
+	"""
+
+	# set up some app ids
+	app = AppInfo('PyOFX', '0100')
+	# if you have problems, fake quicken with one of these app ids
+	quicken_2009 = AppInfo('QWIN', '1800')
+	quicken_older = AppInfo('QWIN', '1200')
+
 	def __init__(self, config, user, password):
 		self.password = password
 		self.user = user
@@ -45,29 +57,28 @@ class OFXClient:
 		self.cookie = 3
 		config["user"] = user
 		config["password"] = password
-		if not config.has_key("appid"):
-			config["appid"] = "QWIN"  # i've had to fake Quicken to actually get my unwilling test server to talk to me
-			config["appver"] = "1200"
+		config.setdefault('appid', self.app.id)
+		config.setdefault('appver', self.app.version)
 
 	def _cookie(self):
 		self.cookie += 1
 		return str(self.cookie)
 
-	"""Generate signon message"""
 	def _signOn(self):
+		"""Generate signon message"""
 		config = self.config
 		fidata = [_field("ORG", config["fiorg"])]
 		if config.has_key("fid"):
 			fidata += [_field("FID", config["fid"])]
 		return _tag("SIGNONMSGSRQV1",
 			_tag("SONRQ",
-				_field("DTCLIENT",_date()),
-				_field("USERID",config["user"]),
-				_field("USERPASS",config["password"]),
-				_field("LANGUAGE","ENG"),
+				_field("DTCLIENT", _date()),
+				_field("USERID", config["user"]),
+				_field("USERPASS", config["password"]),
+				_field("LANGUAGE", "ENG"),
 				_tag("FI", *fidata),
-				_field("APPID",config["appid"]),
-				_field("APPVER",config["appver"]),
+				_field("APPID", config["appid"]),
+				_field("APPVER", config["appver"]),
 			),
 		)
 
@@ -77,7 +88,6 @@ class OFXClient:
 
 	# this is from _ccreq below and reading page 176 of the latest OFX doc.
 	def _bareq(self, acctid, dtstart, accttype):
-		config=self.config
 		req = _tag("STMTRQ",
 			_tag("BANKACCTFROM",
 				_field("BANKID", sites[args.site]["bankid"]),
@@ -92,7 +102,6 @@ class OFXClient:
 		return self._message("BANK", "STMT", req)
 
 	def _ccreq(self, acctid, dtstart):
-		config=self.config
 		req = _tag("CCSTMTRQ",
 			_tag("CCACCTFROM", _field("ACCTID", acctid)),
 			_tag("INCTRAN",
@@ -123,7 +132,6 @@ class OFXClient:
 		return self._message("INVSTMT","INVSTMT",req)
 
 	def _message(self, msgType, trnType, request):
-		config = self.config
 		return _tag(msgType + "MSGSRQV1",
 			_tag(trnType + "TRNRQ",
 				_field("TRNUID", _genuuid()),
@@ -133,7 +141,7 @@ class OFXClient:
 		)
 
 	def _header(self):
-		return join("\r\n", [
+		return '\r\n'.join([
 			"OFXHEADER:100",
 			"DATA:OFXSGML",
 			"VERSION:102",
@@ -148,7 +156,7 @@ class OFXClient:
 
 	def baQuery(self, acctid, dtstart, accttype):
 		"""Bank account statement request"""
-		return join("\r\n",[
+		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
 				self._signOn(),
@@ -158,7 +166,7 @@ class OFXClient:
 
 	def ccQuery(self, acctid, dtstart):
 		"""CC Statement request"""
-		return join("\r\n",[
+		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
 				self._signOn(),
@@ -167,7 +175,7 @@ class OFXClient:
 		])
 
 	def acctQuery(self,dtstart):
-		return join("\r\n",[
+		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
 				self._signOn(),
@@ -176,7 +184,7 @@ class OFXClient:
 		])
 
 	def invstQuery(self, brokerid, acctid, dtstart):
-		return join("\r\n",[
+		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
 				self._signOn(),
@@ -185,14 +193,14 @@ class OFXClient:
 		])
 
 	def doQuery(self,query,name):
-		# N.B. urllib doesn't honor user Content-type, use urllib2
+		headers = {
+			"Content-type": "application/x-ofx",
+			"Accept": "*/*, application/x-ofx",
+		}
 		request = urllib2.Request(
 			self.config["url"],
 			query,
-			{
-				"Content-type": "application/x-ofx",
-				"Accept": "*/*, application/x-ofx"
-			},
+			headers,
 		)
 		if 1:
 			f = urllib2.urlopen(request)
@@ -238,4 +246,3 @@ def handle_command_line():
 
 if __name__=="__main__":
 	handle_command_line()
-
