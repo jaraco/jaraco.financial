@@ -2,8 +2,10 @@
 
 """
 Financial tools
-Copyright (c) 2010 Jason R. Coombs
+Copyright (c) 2010-2011 Jason R. Coombs
 """
+
+import sys
 
 try:
 	from distutils.command.build_py import build_py_2to3 as build_py
@@ -13,6 +15,8 @@ except ImportError:
 from setuptools import setup, find_packages
 
 name = 'jaraco.financial'
+
+argparse_req = ['argparse'] if sys.version_info < (2,7) else []
 
 setup(
 	name = name,
@@ -37,7 +41,7 @@ setup(
 		],
 	},
 	install_requires=[
-	],
+	] + argparse_req,
 	extras_require = {
 	},
 	dependency_links = [

@@ -5,6 +5,8 @@ import httplib
 import urllib2
 import uuid
 import sys
+import argparse
+import getpass
 
 join = str.join
 
@@ -74,7 +76,7 @@ class OFXClient:
 		config=self.config
 		req = _tag("STMTRQ",
 			_tag("BANKACCTFROM",
-				_field("BANKID", sites[argv[1]]["bankid"]),
+				_field("BANKID", sites[args.site]["bankid"]),
 				_field("ACCTID", acctid),
 				_field("ACCTTYPE", accttype),
 			),
@@ -200,27 +202,36 @@ class OFXClient:
 			print request
 			print self.config["url"], query
 
+def get_args():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('site', help="One of {0}".format(', '.join(sites)))
+	parser.add_argument('-u', '--username', default=getpass.getuser())
+	parser.add_argument('-a', '--account')
+	parser.add_argument('-t', '--account-type',
+		help="Required if retrieving bank statement, should be CHECKING, SAVINGS, ...",
+	)
+	globals().update(args = parser.parse_args())
 
-import getpass
-argv = sys.argv
-if __name__=="__main__":
+def handle_command_line():
+	get_args()
 	dtstart = time.strftime("%Y%m%d",time.localtime(time.time()-31*86400))
 	dtnow = time.strftime("%Y%m%d",time.localtime())
-	if len(argv) < 3:
-		print "Usage:",sys.argv[0], "site user [account] [CHECKING/SAVINGS/.. if using BASTMT]"
-		print "available sites:",join(", ",sites.keys())
-		sys.exit()
 	passwd = getpass.getpass()
-	client = OFXClient(sites[argv[1]], argv[2], passwd)
-	if len(argv) < 4:
-	   query = client.acctQuery("19700101000000")
-	   client.doQuery(query, argv[1]+"_acct.ofx")
+	client = OFXClient(sites[args.site], args.username, passwd)
+	if not args.account:
+		query = client.acctQuery("19700101000000")
+		client.doQuery(query, args.site+"_acct.ofx")
 	else:
-	   if "CCSTMT" in sites[argv[1]]["caps"]:
-		  query = client.ccQuery(sys.argv[3], dtstart)
-	   elif "INVSTMT" in sites[argv[1]]["caps"]:
-		  query = client.invstQuery(sites[argv[1]]["fiorg"], sys.argv[3], dtstart)
-	   elif "BASTMT" in sites[argv[1]]["caps"]:
-		  query = client.baQuery(sys.argv[3], dtstart, sys.argv[4])
-	   client.doQuery(query, argv[1]+dtnow+".ofx")
+		caps = sites[args.site]['caps']
+		if "CCSTMT" in caps:
+			query = client.ccQuery(args.account, dtstart)
+		elif "INVSTMT" in caps:
+			query = client.invstQuery(sites[args.site]["fiorg"],
+				args.account, dtstart)
+		elif "BASTMT" in caps:
+			query = client.baQuery(args.account, dtstart, args.account_type)
+		client.doQuery(query, args.site+dtnow+".ofx")
+
+if __name__=="__main__":
+	handle_command_line()
 
