@@ -9,7 +9,9 @@ import argparse
 import getpass
 import itertools
 import collections
+import datetime
 
+import dateutil.parser
 import keyring
 from jaraco.util.string import local_format as lf
 
@@ -215,6 +217,12 @@ class OFXClient(object):
 			print request
 			print self.config["url"], query
 
+class DateAction(argparse.Action):
+	def __call__(self, parser, namespace, values, option_string=None):
+		value = values
+		value = dateutil.parser.parse(value)
+		setattr(namespace, self.dest, value)
+
 def get_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('site', help="One of {0}".format(', '.join(sites)))
@@ -223,6 +231,9 @@ def get_args():
 	parser.add_argument('-t', '--account-type',
 		help="Required if retrieving bank statement, should be CHECKING, SAVINGS, ...",
 	)
+	default_start = datetime.datetime.now() - datetime.timedelta(days=31)
+	parser.add_argument('-d', '--start-date', default=default_start,
+		action=DateAction)
 	globals().update(args = parser.parse_args())
 
 def _get_password():
@@ -236,7 +247,7 @@ def _get_password():
 
 def handle_command_line():
 	get_args()
-	dtstart = time.strftime("%Y%m%d",time.localtime(time.time()-31*86400))
+	dtstart = args.start_date.strftime("%Y%m%d")
 	dtnow = time.strftime("%Y%m%d",time.localtime())
 	passwd = _get_password()
 	client = OFXClient(sites[args.site], args.username, passwd)
