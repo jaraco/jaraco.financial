@@ -231,7 +231,7 @@ def _get_password():
 	password = keyring.get_password(site, username)
 	if password is None:
 		password = getpass.getpass(lf("Password for {site}:{username}: "))
-		keyring.set_password(password)
+		keyring.set_password(site, username, password)
 	return password
 
 def handle_command_line():
