@@ -33,6 +33,7 @@ setup_params = dict(
 		'console_scripts': [
 			'fix-qif-date-format = jaraco.financial.qif:fix_dates_cmd',
 			'launch-in-money = jaraco.financial.msmoney:launch',
+			'ofx = jaraco.financial.ofx:handle_command_line',
 		],
 	},
 	install_requires=[
