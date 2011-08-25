@@ -37,6 +37,7 @@ setup_params = dict(
 	},
 	install_requires=[
 		'keyring',
+		'jaraco.util',
 	] + argparse_req,
 	extras_require = {
 	},

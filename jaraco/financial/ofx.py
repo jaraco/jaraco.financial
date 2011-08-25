@@ -10,6 +10,7 @@ import getpass
 import itertools
 import collections
 
+import keyring
 from jaraco.util.string import local_format as lf
 
 sites = {
@@ -224,11 +225,20 @@ def get_args():
 	)
 	globals().update(args = parser.parse_args())
 
+def _get_password():
+	site = args.site
+	username = args.username
+	password = keyring.get_password(site, username)
+	if password is None:
+		password = getpass.getpass(lf("Password for {site}:{username}: "))
+		keyring.set_password(password)
+	return password
+
 def handle_command_line():
 	get_args()
 	dtstart = time.strftime("%Y%m%d",time.localtime(time.time()-31*86400))
 	dtnow = time.strftime("%Y%m%d",time.localtime())
-	passwd = getpass.getpass()
+	passwd = _get_password()
 	client = OFXClient(sites[args.site], args.username, passwd)
 	if not args.account:
 		query = client.acctQuery("19700101000000")
