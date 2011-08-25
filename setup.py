@@ -51,5 +51,5 @@ setup_params = dict(
 	use2to3=True,
 )
 
-if __name__ == '__init__':
+if __name__ == '__main__':
 	setuptools.setup(**setup_params)
