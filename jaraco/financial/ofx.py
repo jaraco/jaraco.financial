@@ -263,7 +263,8 @@ def _get_password():
 def handle_command_line():
 	get_args()
 	dtstart = args.start_date.strftime("%Y%m%d")
-	dtnow = time.strftime("%Y%m%d",time.localtime())
+	now = datetime.datetime.now()
+	dtnow = now.strftime('%Y-%m-%d')
 	passwd = _get_password()
 	client = OFXClient(sites[args.site], args.username, passwd)
 	if not args.account:
@@ -278,7 +279,8 @@ def handle_command_line():
 				args.account, dtstart)
 		elif "BASTMT" in caps:
 			query = client.baQuery(args.account, dtstart, args.account_type)
-		client.doQuery(query, args.site+dtnow+".ofx")
+		filename = '{args.site} {dtnow}.ofx'.format(args=args, dtnow=dtnow)
+		client.doQuery(query, filename)
 
 if __name__=="__main__":
 	handle_command_line()
