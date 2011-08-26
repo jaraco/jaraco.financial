@@ -16,18 +16,25 @@ import keyring
 from jaraco.util.string import local_format as lf
 
 sites = {
-	"SLFCU": {
-		"caps": ["SIGNON", "BASTMT"],
-		"fid": "1001",
-		"fiorg": "SLFCU",
-		"url": "https://www.cu-athome.org/scripts/serverext.dll",
-		"bankid": "307083911",
-	},
+	"SLFCU": dict(
+		caps = ["SIGNON", "BASTMT"],
+		fid = "1001",
+		fiorg = "SLFCU",
+		url = "https://www.cu-athome.org/scripts/serverext.dll",
+		bankid = "307083911",
+	),
 	"Chase (Credit Card)": dict(
 		caps = ["SIGNON", "CCSTMT"],
 		fid = "10898",
 		fiorg = "B1",
 		url = "https://ofx.chase.com",
+	),
+	"Los Alamos National Bank": dict(
+		caps = ['SIGNON', 'BASTMT'],
+		fid = '107001012',
+		fiorg = 'LANB',
+		url = 'https://www.lanb.com/ofx/ofxrelay.dll',
+		bankid = '107001012',
 	),
 }
 
@@ -54,10 +61,12 @@ class OFXClient(object):
 	"""
 
 	# set up some app ids
-	app = AppInfo('PyOFX', '0100')
+	pyofx = AppInfo('PyOFX', '0100')
 	# if you have problems, fake quicken with one of these app ids
 	quicken_2009 = AppInfo('QWIN', '1800')
 	quicken_older = AppInfo('QWIN', '1200')
+
+	app = pyofx
 
 	def __init__(self, config, user, password):
 		self.password = password
