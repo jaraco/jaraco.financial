@@ -1,5 +1,4 @@
 #!/usr/bin/python
-import time
 import os
 import httplib
 import urllib2
@@ -53,7 +52,7 @@ def _tag(tag, *contents):
 	return '\r\n'.join(lines)
 
 def _date():
-	return time.strftime("%Y%m%d%H%M%S", time.localtime())
+	datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
 def _genuuid():
 	return uuid.uuid4().hex
@@ -147,7 +146,7 @@ class OFXClient(object):
 		return self._message("CREDITCARD", "CCSTMT", req)
 
 	def _invstreq(self, brokerid, acctid, dtstart):
-		dtnow = time.strftime("%Y%m%d%H%M%S", time.localtime())
+		dtnow = _date()
 		req = _tag("INVSTMTRQ",
 			_tag("INVACCTFROM",
 				_field("BROKERID", brokerid),
