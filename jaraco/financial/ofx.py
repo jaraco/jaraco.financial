@@ -10,10 +10,15 @@ import getpass
 import itertools
 import collections
 import datetime
+import contextlib
+import logging
 
 import dateutil.parser
 import keyring
 from jaraco.util.string import local_format as lf
+import jaraco.util.logging
+
+log = logging.getLogger(__name__)
 
 sites = {
 	"SLFCU": dict(
@@ -54,6 +59,18 @@ def _genuuid():
 	return uuid.uuid4().hex
 
 AppInfo = collections.namedtuple('AppInfo', 'id version')
+
+@contextlib.contextmanager
+def url_context(*args, **kwargs):
+	"""
+	Context wrapper around urlopen
+	"""
+	response = urllib2.urlopen(*args, **kwargs)
+	try:
+		yield response
+	finally:
+		response.close()
+
 
 class OFXClient(object):
 	"""
@@ -210,7 +227,7 @@ class OFXClient(object):
 			),
 		])
 
-	def doQuery(self,query,name):
+	def doQuery(self, query, name):
 		headers = {
 			"Content-type": "application/x-ofx",
 			"Accept": "*/*, application/x-ofx",
@@ -221,13 +238,14 @@ class OFXClient(object):
 			headers,
 		)
 		if 1:
-			f = urllib2.urlopen(request)
-			response = f.read()
-			f.close()
+			with url_context(request) as response:
+				payload = response.read()
+				content_type = response.headers.getheader('Content-type')
+				if content_type != 'application/x-ofx':
+					log.warning(lf('Unexpected content type {content_type}'))
 
-			f = file(name, "w")
-			f.write(response)
-			f.close()
+			with file(name, "w") as outfile:
+				outfile.write(payload)
 		else:
 			print request
 			print self.config["url"], query
@@ -249,6 +267,7 @@ def get_args():
 	default_start = datetime.datetime.now() - datetime.timedelta(days=31)
 	parser.add_argument('-d', '--start-date', default=default_start,
 		action=DateAction)
+	jaraco.util.logging.add_arguments(parser)
 	globals().update(args = parser.parse_args())
 
 def _get_password():
@@ -262,6 +281,7 @@ def _get_password():
 
 def handle_command_line():
 	get_args()
+	jaraco.util.logging.setup(args)
 	dtstart = args.start_date.strftime("%Y%m%d")
 	now = datetime.datetime.now()
 	dtnow = now.strftime('%Y-%m-%d')
