@@ -237,18 +237,18 @@ class OFXClient(object):
 			query,
 			headers,
 		)
-		if 1:
-			with url_context(request) as response:
-				payload = response.read()
-				content_type = response.headers.getheader('Content-type')
-				if content_type != 'application/x-ofx':
-					log.warning(lf('Unexpected content type {content_type}'))
 
-			with file(name, "w") as outfile:
-				outfile.write(payload)
-		else:
-			print request
-			print self.config["url"], query
+		url = self.config["url"]
+		log.debug(lf("URL is {url}; query is {query}"))
+
+		with url_context(request) as response:
+			payload = response.read()
+			content_type = response.headers.getheader('Content-type')
+			if content_type != 'application/x-ofx':
+				log.warning(lf('Unexpected content type {content_type}'))
+
+		with file(name, "w") as outfile:
+			outfile.write(payload)
 
 class DateAction(argparse.Action):
 	def __call__(self, parser, namespace, values, option_string=None):
