@@ -52,9 +52,12 @@ def _tag(tag, *contents):
 	return '\r\n'.join(lines)
 
 def _date():
-	datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+	return datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
 def _genuuid():
+	"""
+	Generate a UUID as a string in hex format
+	"""
 	return uuid.uuid4().hex
 
 AppInfo = collections.namedtuple('AppInfo', 'id version')
@@ -98,12 +101,14 @@ class OFXClient(object):
 		self.cookie += 1
 		return str(self.cookie)
 
-	def _signOn(self):
-		"""Generate signon message"""
+	def _sign_on(self):
+		"""
+		Generate the sign-on message
+		"""
 		config = self.config
 		fidata = [_field("ORG", config["fiorg"])]
 		if config.has_key("fid"):
-			fidata += [_field("FID", config["fid"])]
+			fidata.append(_field("FID", config["fid"]))
 		return _tag("SIGNONMSGSRQV1",
 			_tag("SONRQ",
 				_field("DTCLIENT", _date()),
@@ -116,12 +121,11 @@ class OFXClient(object):
 			),
 		)
 
-	def _acctreq(self, dtstart):
+	def _account_request(self, dtstart):
 		req = _tag("ACCTINFORQ", _field("DTACCTUP", dtstart))
 		return self._message("SIGNUP", "ACCTINFO", req)
 
-	# this is from _ccreq below and reading page 176 of the latest OFX doc.
-	def _bareq(self, acctid, dtstart, accttype):
+	def _bank_statement_request(self, acctid, dtstart, accttype):
 		req = _tag("STMTRQ",
 			_tag("BANKACCTFROM",
 				_field("BANKID", sites[args.site]["bankid"]),
@@ -135,7 +139,7 @@ class OFXClient(object):
 		)
 		return self._message("BANK", "STMT", req)
 
-	def _ccreq(self, acctid, dtstart):
+	def _credit_card_statement_request(self, acctid, dtstart):
 		req = _tag("CCSTMTRQ",
 			_tag("CCACCTFROM", _field("ACCTID", acctid)),
 			_tag("INCTRAN",
@@ -145,7 +149,7 @@ class OFXClient(object):
 		)
 		return self._message("CREDITCARD", "CCSTMT", req)
 
-	def _invstreq(self, brokerid, acctid, dtstart):
+	def _investment_request(self, brokerid, acctid, dtstart):
 		dtnow = _date()
 		req = _tag("INVSTMTRQ",
 			_tag("INVACCTFROM",
@@ -188,45 +192,45 @@ class OFXClient(object):
 			"",
 		])
 
-	def baQuery(self, acctid, dtstart, accttype):
+	def bank_account_query(self, acctid, dtstart, accttype):
 		"""Bank account statement request"""
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
-				self._signOn(),
-				self._bareq(acctid, dtstart, accttype),
+				self._sign_on(),
+				self._bank_statement_request(acctid, dtstart, accttype),
 			),
 		])
 
-	def ccQuery(self, acctid, dtstart):
+	def credit_card_query(self, acctid, dtstart):
 		"""CC Statement request"""
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
-				self._signOn(),
-				self._ccreq(acctid, dtstart),
+				self._sign_on(),
+				self._credit_card_statement_request(acctid, dtstart),
 			),
 		])
 
-	def acctQuery(self,dtstart):
+	def account_query(self,dtstart):
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
-				self._signOn(),
-				self._acctreq(dtstart),
+				self._sign_on(),
+				self._account_request(dtstart),
 			),
 		])
 
-	def invstQuery(self, brokerid, acctid, dtstart):
+	def investment_query(self, brokerid, acctid, dtstart):
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
-				self._signOn(),
-				self._invstreq(brokerid, acctid,dtstart),
+				self._sign_on(),
+				self._investment_request(brokerid, acctid,dtstart),
 			),
 		])
 
-	def doQuery(self, query, name):
+	def do_query(self, query, name):
 		headers = {
 			"Content-type": "application/x-ofx",
 			"Accept": "*/*, application/x-ofx",
@@ -287,19 +291,20 @@ def handle_command_line():
 	passwd = _get_password()
 	client = OFXClient(sites[args.site], args.username, passwd)
 	if not args.account:
-		query = client.acctQuery("19700101000000")
-		client.doQuery(query, args.site+"_acct.ofx")
+		query = client.account_query("19700101000000")
+		filename = "{args.site} account info.ofx".format(**globals())
 	else:
 		caps = sites[args.site]['caps']
 		if "CCSTMT" in caps:
-			query = client.ccQuery(args.account, dtstart)
+			query = client.credit_card_query(args.account, dtstart)
 		elif "INVSTMT" in caps:
-			query = client.invstQuery(sites[args.site]["fiorg"],
+			query = client.investment_query(sites[args.site]["fiorg"],
 				args.account, dtstart)
 		elif "BASTMT" in caps:
-			query = client.baQuery(args.account, dtstart, args.account_type)
+			query = client.bank_account_query(args.account, dtstart,
+				args.account_type)
 		filename = '{args.site} {dtnow}.ofx'.format(args=args, dtnow=dtnow)
-		client.doQuery(query, filename)
+	client.do_query(query, filename)
 
 if __name__=="__main__":
 	handle_command_line()
