@@ -12,6 +12,8 @@ import setuptools
 name = 'jaraco.financial'
 
 argparse_req = ['argparse'] if sys.version_info < (2,7) else []
+dateutil_ver = '<2.0dev' if sys.version_info < (3,) else '>=2.0'
+dateutil_req = ['python-dateutil'+dateutil_ver]
 
 setup_params = dict(
 	name = name,
@@ -39,8 +41,7 @@ setup_params = dict(
 	install_requires=[
 		'keyring',
 		'jaraco.util',
-		'python-dateutil',
-	] + argparse_req,
+	] + argparse_req + dateutil_req,
 	extras_require = {
 	},
 	dependency_links = [
