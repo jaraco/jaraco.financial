@@ -37,7 +37,7 @@ sites = {
 		caps = ['SIGNON', 'BASTMT'],
 		fid = '107001012',
 		fiorg = 'LANB',
-		url = 'https://www.lanb.com/ofx/ofxrelay.dll',
+		url = 'https://ofx.lanb.com/ofx/ofxrelay.dll',
 		bankid = '107001012',
 	),
 }
