@@ -19,28 +19,40 @@ import jaraco.util.logging
 
 log = logging.getLogger(__name__)
 
-sites = {
-	"SLFCU": dict(
-		caps = ["SIGNON", "BASTMT"],
-		fid = "1001",
-		fiorg = "SLFCU",
-		url = "https://www.cu-athome.org/scripts/serverext.dll",
-		bankid = "307083911",
-	),
-	"Chase (Credit Card)": dict(
-		caps = ["SIGNON", "CCSTMT"],
-		fid = "10898",
-		fiorg = "B1",
-		url = "https://ofx.chase.com",
-	),
-	"Los Alamos National Bank": dict(
-		caps = ['SIGNON', 'BASTMT'],
-		fid = '107001012',
-		fiorg = 'LANB',
-		url = 'https://ofx.lanb.com/ofx/ofxrelay.dll',
-		bankid = '107001012',
-	),
-}
+def load_sites():
+	"""
+	Locate all setuptools entry points by the name 'financial_institutions'
+	and initialize them.
+	Any third-party library may register an entry point by adding the
+	following to their setup.py::
+
+		entry_points = {
+			'financial_institutions': {
+				'Name of Institution=mylib.mymodule:callable',
+			},
+		},
+	"""
+
+	logging.basicConfig()
+
+	try:
+		import pkg_resources
+	except ImportError:
+		log.warning('setuptools not available - entry points cannot be '
+			'loaded')
+		return
+
+	group = 'financial_institutions'
+	entry_points = pkg_resources.iter_entry_points(group=group)
+	for ep in entry_points:
+		try:
+			log.info('Loading %s', ep.name)
+			detail = ep.load()
+			sites[ep.name] = detail
+		except Exception:
+			log.exception("Error initializing institution %s." % ep)
+
+sites = dict()
 
 def _field(tag, value):
 	return lf('<{tag}>{value}')
@@ -279,6 +291,7 @@ def _get_password():
 	return password
 
 def handle_command_line():
+	load_sites()
 	get_args()
 	jaraco.util.logging.setup(args)
 	dtstart = args.start_date.strftime("%Y%m%d")
