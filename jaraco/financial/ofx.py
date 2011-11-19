@@ -28,9 +28,12 @@ def load_sites():
 
 		entry_points = {
 			'financial_institutions': {
-				'Name of Institution=mylib.mymodule:callable',
+				'Name of Institution=mylib.mymodule:institution',
 			},
 		},
+
+	Where `institution` is a dictionary containing the institution
+	details.
 	"""
 
 	logging.basicConfig()
