@@ -314,7 +314,8 @@ def handle_command_line():
 				args.account, dtstart)
 		elif "BASTMT" in caps:
 			query = client.baQuery(args.account, dtstart, args.account_type)
-		filename = '{args.site} {dtnow}.ofx'.format(args=args, dtnow=dtnow)
+		filename = '{args.site} {args.account} {dtnow}.ofx'.format(
+			args=args, dtnow=dtnow)
 		client.doQuery(query, filename)
 
 if __name__=="__main__":
