@@ -28,12 +28,12 @@ def load_sites():
 
 		entry_points = {
 			'financial_institutions': {
-				'Name of Institution=mylib.mymodule:institution',
+				'institution set=mylib.mymodule:institutions',
 			},
 		},
 
-	Where `institution` is a dictionary containing the institution
-	details.
+	Where `institutions` is a dictionary mapping institution name to
+	institution details.
 	"""
 
 	logging.basicConfig()
@@ -51,7 +51,7 @@ def load_sites():
 		try:
 			log.info('Loading %s', ep.name)
 			detail = ep.load()
-			sites[ep.name] = detail
+			sites.update(detail)
 		except Exception:
 			log.exception("Error initializing institution %s." % ep)
 
