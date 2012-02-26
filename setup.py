@@ -11,9 +11,9 @@ import setuptools
 
 name = 'jaraco.financial'
 
-argparse_req = ['argparse'] if sys.version_info < (2,7) else []
+argparse_req = ['argparse'] if sys.version_info < (2, 7) else []
 dateutil_ver = '<2.0dev' if sys.version_info < (3,) else '>=2.0'
-dateutil_req = ['python-dateutil'+dateutil_ver]
+dateutil_req = ['python-dateutil' + dateutil_ver]
 
 setup_params = dict(
 	name = name,
@@ -21,9 +21,9 @@ setup_params = dict(
 	description = 'Financial tools by jaraco',
 	author = 'Jason R. Coombs',
 	author_email = 'jaraco@jaraco.com',
-	url = 'http://pypi.python.org/pypi/'+name,
+	url = 'http://pypi.python.org/pypi/' + name,
 	packages = setuptools.find_packages(),
-	namespace_packages = ['jaraco',],
+	namespace_packages = ['jaraco', ],
 	license = 'MIT',
 	classifiers = [
 		"Development Status :: 4 - Beta",
