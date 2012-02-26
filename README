@@ -1,0 +1,58 @@
+jaraco.financial
+================
+
+.. contents::
+
+Overview
+--------
+
+``jaraco.financial`` implements tools for financial management, particularly
+around Open Financial Exchange and Microsoft Money. These scripts help
+facilitate the continued use of Money using the free, sunset release, by
+enabling mechanical downloads of OFX data from institutions that support OFX.
+
+``jaraco.financial`` is written by Jason R. Coombs.  It is licensed under an
+`MIT-style permissive license
+<http://www.opensource.org/licenses/mit-license.php>`_.
+
+You can install it with ``easy_install jaraco.financial``, or grab the code
+from the `mercurial repository
+<https://bitbucket.org/jaraco/jaraco.financial>`_.
+
+Getting Started
+---------------
+
+The primary use of this package is the `ofx` command. After installing, run
+`ofx --help` for usage. `jaraco.financial` doesn't provide any institutions,
+but you can see `jaraco.institutions` for an example of a project that
+implements some institutions for use in `jaraco.financial`.
+
+This project is still a work in progress, but if you think you might find
+it useful, don't hesitate to contact the author for help.
+
+Planned Changes
+---------------
+
+The author plans to add some of the following features:
+
+* Provide an input file format for specifying user's account details instead
+  of requiring them to be passed as command-line parameters.
+* Integrate some of the most common institutions.
+
+Changes
+-------
+
+0.2
+~~~
+
+* Integrated OFX support based on scripts provided by Jeremy Jongsma. Includes
+  ability to specify financial institutions as plugins and download OFX data
+  via the command-line script `ofx`.
+* Added keyring support, so credentials for financial institutions are stored
+  securely within the Windows Vault.
+* Added command to clean up temporary files that crash MS Money.
+
+0.1
+~~~
+
+* Initial release with script for launching files in MS Money.
