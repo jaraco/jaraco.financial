@@ -1,6 +1,10 @@
+from __future__ import print_function, unicode_literals, absolute_import
+
 import argparse
 import subprocess
-import itertools
+import os
+import re
+
 from path import path
 
 def find_programfiles_dir(child):
@@ -25,3 +29,17 @@ def launch():
 	money = find_money()
 	args = get_args()
 	subprocess.Popen([money, args.filename])
+
+def clean_temp():
+	"""
+	Sometimes, Money will crash on an invalid file, and the only way to get it
+	start is to clean the registry or remove the files. This technique
+	removes the files, and Money will clean the registry on the next start.
+	"""
+	to_remove = [
+		f for f in path(os.environ['TEMP']).files()
+		if re.match(r'~of[0-9A-Z]{4}\.tmp', f.basename())
+	]
+	for f in to_remove:
+		print('removing', f)
+		f.remove()
