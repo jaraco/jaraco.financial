@@ -246,8 +246,8 @@ class OFXClient(object):
 		}
 		request = urllib2.Request(
 			self.config["url"],
-			query,
-			headers,
+			data = query,
+			headers = headers,
 		)
 
 		url = self.config["url"]
@@ -299,7 +299,8 @@ def handle_command_line():
 	now = datetime.datetime.now()
 	dtnow = now.strftime('%Y-%m-%d')
 	passwd = _get_password()
-	client = OFXClient(sites[args.site], args.username, passwd)
+	config = sites[args.site]
+	client = OFXClient(config, args.username, passwd)
 	if not args.account:
 		query = client.acctQuery("19700101000000")
 		client.doQuery(query, args.site + "_acct.ofx")
