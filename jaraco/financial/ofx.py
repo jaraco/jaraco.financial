@@ -81,6 +81,22 @@ def url_context(*args, **kwargs):
 	finally:
 		response.close()
 
+def sign_on_message(config):
+	fidata = [_field("ORG", config["fiorg"])]
+	if 'fid' in config:
+		fidata += [_field("FID", config["fid"])]
+	return _tag("SIGNONMSGSRQV1",
+		_tag("SONRQ",
+			_field("DTCLIENT", _date()),
+			_field("USERID", config["user"]),
+			_field("USERPASS", config["password"]),
+			_field("LANGUAGE", "ENG"),
+			_tag("FI", *fidata),
+			_field("APPID", config["appid"]),
+			_field("APPVER", config["appver"]),
+		),
+	)
+
 
 class OFXClient(object):
 	"""
@@ -109,23 +125,9 @@ class OFXClient(object):
 		self.cookie += 1
 		return str(self.cookie)
 
-	def _signOn(self):
+	def sign_on(self):
 		"""Generate signon message"""
-		config = self.config
-		fidata = [_field("ORG", config["fiorg"])]
-		if 'fid' in config:
-			fidata += [_field("FID", config["fid"])]
-		return _tag("SIGNONMSGSRQV1",
-			_tag("SONRQ",
-				_field("DTCLIENT", _date()),
-				_field("USERID", config["user"]),
-				_field("USERPASS", config["password"]),
-				_field("LANGUAGE", "ENG"),
-				_tag("FI", *fidata),
-				_field("APPID", config["appid"]),
-				_field("APPVER", config["appver"]),
-			),
-		)
+		return sign_on_message(self.config)
 
 	def _acctreq(self, dtstart):
 		req = _tag("ACCTINFORQ", _field("DTACCTUP", dtstart))
@@ -204,7 +206,7 @@ class OFXClient(object):
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
-				self._signOn(),
+				self.sign_on(),
 				self._bareq(acctid, dtstart, accttype),
 			),
 		])
@@ -214,7 +216,7 @@ class OFXClient(object):
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
-				self._signOn(),
+				self.sign_on(),
 				self._ccreq(acctid, dtstart),
 			),
 		])
@@ -223,7 +225,7 @@ class OFXClient(object):
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
-				self._signOn(),
+				self.sign_on(),
 				self._acctreq(dtstart),
 			),
 		])
@@ -232,7 +234,7 @@ class OFXClient(object):
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
-				self._signOn(),
+				self.sign_on(),
 				self._invstreq(brokerid, acctid, dtstart),
 			),
 		])
