@@ -1,9 +1,5 @@
-#!/usr/bin/python
-import os
-import httplib
 import urllib2
 import uuid
-import sys
 import argparse
 import getpass
 import itertools
@@ -117,7 +113,7 @@ class OFXClient(object):
 		"""Generate signon message"""
 		config = self.config
 		fidata = [_field("ORG", config["fiorg"])]
-		if config.has_key("fid"):
+		if 'fid' in config:
 			fidata += [_field("FID", config["fid"])]
 		return _tag("SIGNONMSGSRQV1",
 			_tag("SONRQ",
@@ -178,7 +174,7 @@ class OFXClient(object):
 			),
 			_field("INCBAL", "Y"),
 		)
-		return self._message("INVSTMT","INVSTMT",req)
+		return self._message("INVSTMT", "INVSTMT", req)
 
 	def _message(self, msgType, trnType, request):
 		return _tag(msgType + "MSGSRQV1",
@@ -223,7 +219,7 @@ class OFXClient(object):
 			),
 		])
 
-	def acctQuery(self,dtstart):
+	def acctQuery(self, dtstart):
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
@@ -237,7 +233,7 @@ class OFXClient(object):
 			self._header(),
 			_tag("OFX",
 				self._signOn(),
-				self._invstreq(brokerid, acctid,dtstart),
+				self._invstreq(brokerid, acctid, dtstart),
 			),
 		])
 
@@ -304,7 +300,7 @@ def handle_command_line():
 	client = OFXClient(sites[args.site], args.username, passwd)
 	if not args.account:
 		query = client.acctQuery("19700101000000")
-		client.doQuery(query, args.site+"_acct.ofx")
+		client.doQuery(query, args.site + "_acct.ofx")
 	else:
 		caps = sites[args.site]['caps']
 		if "CCSTMT" in caps:
@@ -318,5 +314,6 @@ def handle_command_line():
 			args=args, dtnow=dtnow)
 		client.doQuery(query, filename)
 
-if __name__=="__main__":
+args = None
+if __name__ == "__main__":
 	handle_command_line()
