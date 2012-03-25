@@ -42,6 +42,15 @@ The author plans to add some of the following features:
 Changes
 -------
 
+0.3
+~~~
+
+* `ofx` script now implements different commands. Where one called "ofx"
+  before, now call "ofx query".
+* Added new command "ofx download-all" (not yet implemented).
+* Added command "record-document-hashes" for e-mailing record of the
+  hashes of each document.
+
 0.2
 ~~~
 

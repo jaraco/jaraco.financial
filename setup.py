@@ -28,7 +28,8 @@ setup_params = dict(
 	classifiers = [
 		"Development Status :: 4 - Beta",
 		"Intended Audience :: Developers",
-		"Programming Language :: Python",
+		"Programming Language :: Python :: 2.6",
+		"Programming Language :: Python :: 2.7",
 		"Programming Language :: Python :: 3",
 	],
 	entry_points = {
@@ -42,7 +43,7 @@ setup_params = dict(
 	},
 	install_requires=[
 		'keyring',
-		'jaraco.util',
+		'jaraco.util>=5.3',
 	] + argparse_req + dateutil_req,
 	extras_require = {
 	},

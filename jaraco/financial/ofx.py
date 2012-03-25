@@ -7,11 +7,14 @@ import collections
 import datetime
 import contextlib
 import logging
+import inspect
 
 import dateutil.parser
 import keyring
+import jaraco.util.string as jstring
 from jaraco.util.string import local_format as lf
 import jaraco.util.logging
+import jaraco.util.meta
 
 log = logging.getLogger(__name__)
 
@@ -268,54 +271,96 @@ class DateAction(argparse.Action):
 		value = dateutil.parser.parse(value)
 		setattr(namespace, self.dest, value)
 
-def get_args():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('site', help="One of {0}".format(', '.join(sites)))
-	parser.add_argument('-u', '--username', default=getpass.getuser())
-	parser.add_argument('-a', '--account')
-	parser.add_argument('-t', '--account-type',
-		help="Required if retrieving bank statement, should be CHECKING, SAVINGS, ...",
-	)
-	default_start = datetime.datetime.now() - datetime.timedelta(days=31)
-	parser.add_argument('-d', '--start-date', default=default_start,
-		action=DateAction)
-	jaraco.util.logging.add_arguments(parser)
-	globals().update(args = parser.parse_args())
+# todo: move the following class to jaraco.util
+class Command(object):
+	__metaclass__ = jaraco.util.meta.LeafClassesMeta
 
-def _get_password():
-	site = args.site
-	username = args.username
-	password = keyring.get_password(site, username)
-	if password is None:
-		password = getpass.getpass(lf("Password for {site}:{username}: "))
-		keyring.set_password(site, username, password)
-	return password
+	@classmethod
+	def add_subparsers(cls, parser):
+		subparsers = parser.add_subparsers()
+		[cmd_class.add_parser(subparsers) for cmd_class in cls._leaf_classes]
+
+	@classmethod
+	def add_parser(cls, subparsers):
+		cmd_string = jstring.words(cls.__name__).lowered().dash_separated()
+		parser = subparsers.add_parser(cmd_string)
+		parser.set_defaults(action=cls)
+		return parser
+
+class Query(Command):
+	@classmethod
+	def add_parser(cls, subparsers):
+		parser = super(Query, cls).add_parser(subparsers)
+		parser.add_argument('site', help="One of {0}".format(', '.join(sites)))
+		parser.add_argument('-u', '--username', default=getpass.getuser())
+		parser.add_argument('-a', '--account')
+		parser.add_argument('-t', '--account-type',
+			help="Required if retrieving bank statement, should be CHECKING, SAVINGS, ...",
+		)
+		default_start = datetime.datetime.now() - datetime.timedelta(days=31)
+		parser.add_argument('-d', '--start-date', default=default_start,
+			action=DateAction)
+		return parser
+
+	@staticmethod
+	def _get_password():
+		site = args.site
+		username = args.username
+		password = keyring.get_password(site, username)
+		if password is None:
+			password = getpass.getpass(lf("Password for {site}:{username}: "))
+			keyring.set_password(site, username, password)
+		return password
+
+	@classmethod
+	def run(cls):
+		dtstart = args.start_date.strftime("%Y%m%d")
+		now = datetime.datetime.now()
+		dtnow = now.strftime('%Y-%m-%d')
+		passwd = cls._get_password()
+		config = sites[args.site]
+		client = OFXClient(config, args.username, passwd)
+		if not args.account:
+			query = client.acctQuery("19700101000000")
+			client.doQuery(query, args.site + "_acct.ofx")
+		else:
+			caps = sites[args.site]['caps']
+			if "CCSTMT" in caps:
+				query = client.ccQuery(args.account, dtstart)
+			elif "INVSTMT" in caps:
+				query = client.invstQuery(sites[args.site]["fiorg"],
+					args.account, dtstart)
+			elif "BASTMT" in caps:
+				query = client.baQuery(args.account, dtstart, args.account_type)
+			filename = '{args.site} {args.account} {dtnow}.ofx'.format(
+				args=args, dtnow=dtnow)
+			client.doQuery(query, filename)
+
+class DownloadAll(Command):
+	@classmethod
+	def add_parser(cls, subparsers):
+		parser = super(DownloadAll, cls).add_parser(subparsers)
+		default_start = datetime.datetime.now() - datetime.timedelta(days=31)
+		parser.add_argument('-d', '--start-date', default=default_start,
+			action=DateAction)
+		return parser
+
+	@classmethod
+	def run(cls):
+		raise NotImplementedError()
+
+def get_args():
+	usage = inspect.getdoc(handle_command_line)
+	parser = argparse.ArgumentParser(usage=usage)
+	jaraco.util.logging.add_arguments(parser)
+	Command.add_subparsers(parser)
+	globals().update(args = parser.parse_args())
 
 def handle_command_line():
 	load_sites()
 	get_args()
 	jaraco.util.logging.setup(args)
-	dtstart = args.start_date.strftime("%Y%m%d")
-	now = datetime.datetime.now()
-	dtnow = now.strftime('%Y-%m-%d')
-	passwd = _get_password()
-	config = sites[args.site]
-	client = OFXClient(config, args.username, passwd)
-	if not args.account:
-		query = client.acctQuery("19700101000000")
-		client.doQuery(query, args.site + "_acct.ofx")
-	else:
-		caps = sites[args.site]['caps']
-		if "CCSTMT" in caps:
-			query = client.ccQuery(args.account, dtstart)
-		elif "INVSTMT" in caps:
-			query = client.invstQuery(sites[args.site]["fiorg"],
-				args.account, dtstart)
-		elif "BASTMT" in caps:
-			query = client.baQuery(args.account, dtstart, args.account_type)
-		filename = '{args.site} {args.account} {dtnow}.ofx'.format(
-			args=args, dtnow=dtnow)
-		client.doQuery(query, filename)
+	args.action.run()
 
 args = None
 if __name__ == "__main__":
