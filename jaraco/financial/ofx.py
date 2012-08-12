@@ -311,6 +311,14 @@ class Command(object):
 			args=args, dtnow=dtnow)
 		client.doQuery(query, filename)
 
+	@staticmethod
+	def _get_password(site, username):
+		password = keyring.get_password(site, username)
+		if password is None:
+			password = getpass.getpass(lf("Password for {site}:{username}: "))
+			keyring.set_password(site, username, password)
+		return password
+
 
 class Query(Command):
 	@classmethod
@@ -331,16 +339,13 @@ class Query(Command):
 	def _get_password():
 		site = args.site
 		username = args.username
-		password = keyring.get_password(site, username)
-		if password is None:
-			password = getpass.getpass(lf("Password for {site}:{username}: "))
-			keyring.set_password(site, username, password)
-		return password
+		return Command._get_password(site, username)
 
 	@classmethod
 	def run(cls):
 		creds = args.username, cls._get_password()
 		if not args.account:
+			# download account info
 			config = sites[args.site]
 			client = OFXClient(config, *creds)
 			query = client.acctQuery("19700101000000")
