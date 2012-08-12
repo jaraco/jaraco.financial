@@ -335,15 +335,9 @@ class Query(Command):
 			action=DateAction)
 		return parser
 
-	@staticmethod
-	def _get_password():
-		site = args.site
-		username = args.username
-		return Command._get_password(site, username)
-
 	@classmethod
 	def run(cls):
-		creds = args.username, cls._get_password()
+		creds = args.username, cls._get_password(args.site, args.username)
 		if not args.account:
 			# download account info
 			config = sites[args.site]
