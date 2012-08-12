@@ -291,6 +291,27 @@ class Command(object):
 		parser.set_defaults(action=cls)
 		return parser
 
+	@staticmethod
+	def download(site, account, dt_start, creds, account_type=None):
+		now = datetime.datetime.now()
+		dtnow = now.strftime('%Y-%m-%d')
+
+		config = sites[site]
+		client = OFXClient(config, *creds)
+
+		caps = sites[args.site]['caps']
+		if "CCSTMT" in caps:
+			query = client.ccQuery(args.account, dt_start)
+		elif "INVSTMT" in caps:
+			query = client.invstQuery(sites[args.site]["fiorg"],
+				args.account, dt_start)
+		elif "BASTMT" in caps:
+			query = client.baQuery(args.account, dt_start, args.account_type)
+		filename = '{args.site} {args.account} {dtnow}.ofx'.format(
+			args=args, dtnow=dtnow)
+		client.doQuery(query, filename)
+
+
 class Query(Command):
 	@classmethod
 	def add_parser(cls, subparsers):
@@ -318,27 +339,16 @@ class Query(Command):
 
 	@classmethod
 	def run(cls):
-		dtstart = args.start_date.strftime("%Y%m%d")
-		now = datetime.datetime.now()
-		dtnow = now.strftime('%Y-%m-%d')
-		passwd = cls._get_password()
-		config = sites[args.site]
-		client = OFXClient(config, args.username, passwd)
+		creds = args.username, cls._get_password()
 		if not args.account:
+			config = sites[args.site]
+			client = OFXClient(config, *creds)
 			query = client.acctQuery("19700101000000")
 			client.doQuery(query, args.site + "_acct.ofx")
 		else:
-			caps = sites[args.site]['caps']
-			if "CCSTMT" in caps:
-				query = client.ccQuery(args.account, dtstart)
-			elif "INVSTMT" in caps:
-				query = client.invstQuery(sites[args.site]["fiorg"],
-					args.account, dtstart)
-			elif "BASTMT" in caps:
-				query = client.baQuery(args.account, dtstart, args.account_type)
-			filename = '{args.site} {args.account} {dtnow}.ofx'.format(
-				args=args, dtnow=dtnow)
-			client.doQuery(query, filename)
+			dt_start = args.start_date.strftime("%Y%m%d")
+			cls.download(args.site, args.account, dt_start, creds,
+				args.account_type)
 
 class DownloadAll(Command):
 	@classmethod
