@@ -365,7 +365,12 @@ class DownloadAll(Command):
 		with open(accounts) as f:
 			accounts = json.load(f)
 		print('Found', len(accounts), 'accounts')
-		raise NotImplementedError()
+		for account in accounts:
+			username = account.get('username', getpass.getuser())
+			site = account['institution']
+			creds = username, cls._get_password(site, username)
+			cls.download(account['institution'], account['account'],
+				args.start_date, creds, account.get('account_type'))
 
 def get_args():
 	usage = inspect.getdoc(handle_command_line)
