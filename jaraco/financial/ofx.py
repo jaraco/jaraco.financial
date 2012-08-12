@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals, print_function
+
 import urllib2
 import uuid
 import argparse
@@ -8,7 +10,9 @@ import datetime
 import contextlib
 import logging
 import inspect
+import json
 
+import path
 import dateutil.parser
 import keyring
 import jaraco.util.string as jstring
@@ -347,6 +351,11 @@ class DownloadAll(Command):
 
 	@classmethod
 	def run(cls):
+		root = path.path('~/Documents/Financial').expanduser()
+		accounts = root / 'accounts.json'
+		with open(accounts) as f:
+			accounts = json.load(f)
+		print('Found', len(accounts), 'accounts')
 		raise NotImplementedError()
 
 def get_args():
