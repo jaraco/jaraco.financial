@@ -293,22 +293,19 @@ class Command(object):
 
 	@staticmethod
 	def download(site, account, dt_start, creds, account_type=None):
-		now = datetime.datetime.now()
-		dtnow = now.strftime('%Y-%m-%d')
-
 		config = sites[site]
 		client = OFXClient(config, *creds)
 
-		caps = sites[args.site]['caps']
+		caps = sites[site]['caps']
 		if "CCSTMT" in caps:
-			query = client.ccQuery(args.account, dt_start)
+			query = client.ccQuery(account, dt_start)
 		elif "INVSTMT" in caps:
-			query = client.invstQuery(sites[args.site]["fiorg"],
-				args.account, dt_start)
+			query = client.invstQuery(sites[site]["fiorg"], account, dt_start)
 		elif "BASTMT" in caps:
-			query = client.baQuery(args.account, dt_start, args.account_type)
-		filename = '{args.site} {args.account} {dtnow}.ofx'.format(
-			args=args, dtnow=dtnow)
+			query = client.baQuery(account, dt_start, account_type)
+		filename = '{site} {account} {dtnow}.ofx'.format(
+			dtnow = datetime.datetime.now().strftime('%Y-%m-%d'),
+			**vars())
 		client.doQuery(query, filename)
 
 	@staticmethod
@@ -369,7 +366,7 @@ class DownloadAll(Command):
 			username = account.get('username', getpass.getuser())
 			site = account['institution']
 			creds = username, cls._get_password(site, username)
-			cls.download(account['institution'], account['account'],
+			cls.download(site, account['account'],
 				args.start_date, creds, account.get('account_type'))
 
 def get_args():
