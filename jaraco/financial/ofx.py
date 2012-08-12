@@ -141,10 +141,10 @@ class OFXClient(object):
 		return self._message("SIGNUP", "ACCTINFO", req)
 
 	# this is from _ccreq below and reading page 176 of the latest OFX doc.
-	def _bareq(self, acctid, dtstart, accttype):
+	def _bareq(self, bankid, acctid, dtstart, accttype):
 		req = _tag("STMTRQ",
 			_tag("BANKACCTFROM",
-				_field("BANKID", sites[args.site]["bankid"]),
+				_field("BANKID", bankid),
 				_field("ACCTID", acctid),
 				_field("ACCTTYPE", accttype),
 			),
@@ -208,13 +208,13 @@ class OFXClient(object):
 			"",
 		])
 
-	def baQuery(self, acctid, dtstart, accttype):
+	def baQuery(self, bankid, acctid, dtstart, accttype):
 		"""Bank account statement request"""
 		return '\r\n'.join([
 			self._header(),
 			_tag("OFX",
 				self.sign_on(),
-				self._bareq(acctid, dtstart, accttype),
+				self._bareq(bankid, acctid, dtstart, accttype),
 			),
 		])
 
@@ -302,7 +302,8 @@ class Command(object):
 		elif "INVSTMT" in caps:
 			query = client.invstQuery(sites[site]["fiorg"], account, dt_start)
 		elif "BASTMT" in caps:
-			query = client.baQuery(account, dt_start, account_type)
+			bank_id = config["bankid"]
+			query = client.baQuery(bank_id, account, dt_start, account_type)
 		filename = '{site} {account} {dtnow}.ofx'.format(
 			dtnow = datetime.datetime.now().strftime('%Y-%m-%d'),
 			**vars())
