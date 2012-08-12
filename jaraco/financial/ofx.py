@@ -367,8 +367,9 @@ class DownloadAll(Command):
 			username = account.get('username', getpass.getuser())
 			site = account['institution']
 			creds = username, cls._get_password(site, username)
-			cls.download(site, account['account'],
-				args.start_date, creds, account.get('account_type'))
+			acct_type = account.get('type', '').upper() or None
+			dt_start = args.start_date.strftime("%Y%m%d")
+			cls.download(site, account['account'], dt_start, creds, acct_type)
 
 def get_args():
 	usage = inspect.getdoc(handle_command_line)
