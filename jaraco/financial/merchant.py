@@ -4,12 +4,12 @@ import re
 import collections
 
 from bs4 import BeautifulSoup
-import path
 
-def run():
-	doc = path.path('//drake/users/jaraco/Downloads/'
-		'TLReport_PortfolioFinancialNetProfitMultiMonth_CPL-001.xls').expanduser()
-	with open(doc) as f:
+def load_report(source):
+	"""
+	Load a report as downloaded from Translink
+	"""
+	with open(source) as f:
 		data = f.read()
 	data = '<html>'+data+'</html>'
 	soup = BeautifulSoup(data)
@@ -18,7 +18,6 @@ def run():
 	assert len(tables) == 1
 	table = tables[0]
 	agents = map(Agent.from_row, table)
-	map(print, agents)
 
 	return agents
 
@@ -118,6 +117,3 @@ def parse_table(node):
 	rows = [collections.OrderedDict(zip(header, data(row)))
 		for row in rows]
 	return rows
-
-if __name__ == '__main__':
-	run()
