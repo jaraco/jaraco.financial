@@ -1,9 +1,18 @@
+"""
+A collection of Merchant-processing routines for Cornerstone, LLC.
+"""
+
 from __future__ import print_function, unicode_literals
 
 import re
 import collections
+import pickle
+import decimal
+import datetime
 
 from bs4 import BeautifulSoup
+
+from . import ledger
 
 def load_report(source):
 	"""
@@ -86,8 +95,11 @@ class Transaction(object):
 
 	@classmethod
 	def from_row(cls, row):
-		dates = filter(None, map(Date.from_key, row))
-		return [Transaction(date, row[date]) for date in dates]
+		return [
+			Transaction(date, row[date])
+			for date in map(Date.from_key, row)
+			if date and row[date]
+		]
 
 	def __repr__(self):
 		return 'Transaction({date}, {amount})'.format(**vars(self))
@@ -102,9 +114,10 @@ class Date(unicode):
 			return None
 		return cls(key)
 
-
-def get_agents(table):
-	return map(Agent.from_row, table)
+	def as_object(self):
+		"Return self as a datetime.date object (1st of the month)"
+		month, year = map(int, self.split('/'))
+		return datetime.date(year, month, 1)
 
 def data(row):
 	return [
@@ -117,3 +130,47 @@ def parse_table(node):
 	rows = [collections.OrderedDict(zip(header, data(row)))
 		for row in rows]
 	return rows
+
+def parse_amount(amount_str):
+	"""
+	>>> parse_amount('$20.0')
+	20.0
+	>>> parse_amount('(30)')
+	-30
+	>>> parse_amount('($30.1)')
+	-30.1
+	"""
+	amount_str = amount_str.replace('$', '').replace(',', '')
+	if amount_str.startswith('(') and amount_str.endswith(')'):
+		amount_str = '-'+amount_str.strip('()')
+	return decimal.Decimal(amount_str)
+
+def build_portfolio():
+	"Build a portfolio from a report"
+	portfolio = dict()
+	try:
+		with open('portfolio.pickle', 'rb') as pfp:
+			portfolio = pickle.load(pfp)
+	except:
+		pass
+	import sys
+	filename = sys.argv[1]
+	report = load_report(filename)
+	for agent in report:
+		agent_lgr = portfolio.setdefault(agent, ledger.Ledger())
+		for merchant, residuals in agent.accounts.iteritems():
+			for residual in residuals:
+				amount = parse_amount(residual.amount)
+				date = residual.date.as_object()
+				designation = ledger.SimpleDesignation(
+					descriptor = "Residuals Earned : " + unicode(merchant),
+					amount = amount,
+					)
+				txn = ledger.Transaction(date=date,
+					designation=designation)
+				agent_lgr.add(txn)
+	with open('portfolio.pickle', 'wb') as pfp:
+		pickle.dump(portfolio, pfp, protocol=pickle.HIGHEST_PROTOCOL)
+
+if __name__ == '__main__':
+	build_portfolio()
