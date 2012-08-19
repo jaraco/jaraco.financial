@@ -46,6 +46,10 @@ class Ledger(list):
 	def add(self, item):
 		bisect.insort_right(self, item)
 
+	@property
+	def balance(self):
+		return sum(txn.amount for txn in self)
+
 class Named(object):
 	def __init__(self, name, *args, **kwargs):
 		super(Named, self).__init__(*args, **kwargs)

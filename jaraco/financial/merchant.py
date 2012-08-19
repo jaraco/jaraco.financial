@@ -2,7 +2,7 @@
 A collection of Merchant-processing routines for Cornerstone, LLC.
 """
 
-from __future__ import print_function, unicode_literals
+from __future__ import print_function, unicode_literals, division
 
 import re
 import collections
@@ -168,7 +168,22 @@ def build_portfolio():
 					)
 				txn = ledger.Transaction(date=date,
 					designation=designation)
+				txn.source = 'ISO statement'
+				if txn in agent_lgr:
+					# skip transactions that are already an exact match
+					print('.', end='')
+					continue
 				agent_lgr.add(txn)
+				# pay share to Cornerstone
+				designation = ledger.SimpleDesignation(
+					descriptor = "Residuals Shared : " + unicode(merchant),
+					amount = -txn.amount / 2,
+				)
+				txn = ledger.Transaction(date=date,
+					designation=designation)
+				txn.source = 'calculated'
+				agent_lgr.add(txn)
+
 	with open('portfolio.pickle', 'wb') as pfp:
 		pickle.dump(portfolio, pfp, protocol=pickle.HIGHEST_PROTOCOL)
 
