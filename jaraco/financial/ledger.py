@@ -23,7 +23,8 @@ class Transaction(object):
 		"""
 		return sum(
 			item.amount
-			for item in jaraco.util.itertools.always_list(self.designation)
+			for item in
+				jaraco.util.itertools.always_iterable(self.designation)
 		)
 
 	# for the purpose of sorting transactions chronologically, sort by date
@@ -44,7 +45,7 @@ class Ledger(list):
 	A list of transactions, sorted by date.
 	"""
 	def add(self, item):
-		bisect.insort_right(self, item)
+		bisect.insort(self, item)
 
 	@property
 	def balance(self):

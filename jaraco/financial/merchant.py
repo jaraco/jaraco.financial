@@ -9,8 +9,10 @@ import collections
 import pickle
 import decimal
 import datetime
+import itertools
 
 from bs4 import BeautifulSoup
+import xlsxcessive.xlsx
 
 from . import ledger
 
@@ -26,7 +28,7 @@ def load_report(source):
 	tables = map(parse_table, soup.find_all('table'))
 	assert len(tables) == 1
 	table = tables[0]
-	agents = map(Agent.from_row, table)
+	agents = set(map(Agent.from_row, table))
 
 	return agents
 
@@ -98,7 +100,7 @@ class Transaction(object):
 		return [
 			Transaction(date, row[date])
 			for date in map(Date.from_key, row)
-			if date and row[date]
+			if date and row[date] != '$0.00'
 		]
 
 	def __repr__(self):
@@ -145,9 +147,31 @@ def parse_amount(amount_str):
 		amount_str = '-'+amount_str.strip('()')
 	return decimal.Decimal(amount_str)
 
+class SheetWriter(object):
+	def __init__(self, sheet):
+		self.sheet = sheet
+		self.row_count = itertools.count()
+
+	def write(self, *values):
+		row = next(self.row_count)
+		for col, value in enumerate(values):
+			self.sheet.cell(coords=(row, col), value=value)
+
+class Portfolio(dict):
+	def export(self, filename):
+		workbook = xlsxcessive.xlsx.Workbook()
+		for agent, agent_lgr in self.iteritems():
+			sheet = workbook.new_sheet(agent.name)
+			w = SheetWriter(sheet)
+			w.write('Date', 'Payee', 'Category', 'Amount')
+			for txn in agent_lgr:
+				w.write(txn.date, None, txn.designation.descriptor,
+					txn.amount)
+		xlsxcessive.xlsx.save(workbook, filename)
+
 def build_portfolio():
 	"Build a portfolio from a report"
-	portfolio = dict()
+	portfolio = Portfolio()
 	try:
 		with open('portfolio.pickle', 'rb') as pfp:
 			portfolio = pickle.load(pfp)
@@ -169,10 +193,12 @@ def build_portfolio():
 				txn = ledger.Transaction(date=date,
 					designation=designation)
 				txn.source = 'ISO statement'
+
 				if txn in agent_lgr:
 					# skip transactions that are already an exact match
 					print('.', end='')
 					continue
+
 				agent_lgr.add(txn)
 				# pay share to Cornerstone
 				designation = ledger.SimpleDesignation(
@@ -186,6 +212,7 @@ def build_portfolio():
 
 	with open('portfolio.pickle', 'wb') as pfp:
 		pickle.dump(portfolio, pfp, protocol=pickle.HIGHEST_PROTOCOL)
+	portfolio.export('portfolio.xlsx')
 
 if __name__ == '__main__':
 	build_portfolio()
