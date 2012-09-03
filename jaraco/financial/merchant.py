@@ -72,7 +72,8 @@ class Agent(object):
 	def add_row(self, row):
 		merchant = Merchant.from_row(row)
 		transactions = Transaction.from_row(row)
-		self.accounts[merchant] = transactions
+		by_date = lambda txn: txn.date.as_object()
+		self.accounts[merchant] = sorted(transactions, key=by_date)
 
 class Merchant(object):
 	_merchants = dict()
@@ -244,7 +245,7 @@ def build_portfolio():
 					for txn in advance_txns)
 				if outstanding > 0:
 					# amount to repay
-					repay_adv = -min(outstanding, amount)
+					repay_adv = -min(outstanding, amount / 2)
 					designation = ledger.SimpleDesignation(
 						descriptor = advance_descriptor, amount=repay_adv)
 					txn = ledger.Transaction(date=date,
