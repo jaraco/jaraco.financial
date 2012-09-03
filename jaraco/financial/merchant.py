@@ -99,7 +99,7 @@ class Merchant(object):
 		return {
 			'096367': 'advance',
 			'096403': 'residual',
-			'096509': 'simple',
+			'096590': 'simple',
 		}[self.association_number]
 
 class Transaction(object):
@@ -231,6 +231,11 @@ class Portfolio(dict):
 
 	def account_for_advances(self, merchant, agent_lgr, date, amount):
 		"account for advances"
+
+		if merchant.association_name == 'simple':
+			# we don't account for advances with simple merchant associations
+			return
+
 		# first add the $400 advance if it's not already present
 		advance_descriptor = "Residual Advance : " + unicode(merchant)
 		add_advance = is_empty(
