@@ -193,10 +193,13 @@ class Portfolio(dict):
 		report = load_report(filename)
 		for agent in report:
 			agent_lgr = self.setdefault(agent, ledger.Ledger())
+			# keep track of the dates where transactions occurred
+			dates = set()
 			for merchant, residuals in agent.accounts.iteritems():
 				for residual in residuals:
 					amount = parse_amount(residual.amount)
 					date = residual.date.as_object()
+					dates.add(date)
 					designation = ledger.SimpleDesignation(
 						descriptor = "Residuals Earned : " + unicode(merchant),
 						amount = amount,
@@ -223,11 +226,24 @@ class Portfolio(dict):
 
 					self.account_for_advances(merchant, agent_lgr, date,
 						amount)
-
+			[self.pay_balance(agent_lgr, date) for date in sorted(dates)]
 
 		with open('portfolio.pickle', 'wb') as pfp:
 			pickle.dump(self, pfp, protocol=pickle.HIGHEST_PROTOCOL)
 		self.export('portfolio.xlsx')
+
+	def pay_balance(self, agent_lgr, date):
+		"""
+		For the given date, calculate the balance through that date and add a
+		transaction on that date to bring the account balance to zero.
+		"""
+		balance = agent_lgr.balance_through(date)
+		designation = ledger.SimpleDesignation(
+			descriptor = "Commissions Paid",
+			amount = -balance,
+		)
+		txn = ledger.Transaction(date=date, designation=designation)
+		agent_lgr.add(txn)
 
 	def account_for_advances(self, merchant, agent_lgr, date, amount):
 		"account for advances"

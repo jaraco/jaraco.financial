@@ -53,6 +53,12 @@ class Ledger(list):
 	def balance(self):
 		return sum(txn.amount for txn in self)
 
+	def balance_through(self, date):
+		"""
+		Return the balance up to and including a given date.
+		"""
+		return sum(txn.amount for txn in self if txn.date <= date)
+
 	def query(self, descriptor=None, amount=None):
 		for txn in self:
 			dsgns = jaraco.util.itertools.always_iterable(txn.designation)
