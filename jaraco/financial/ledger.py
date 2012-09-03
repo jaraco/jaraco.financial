@@ -16,16 +16,18 @@ class Transaction(object):
 		if not 'date' in vars(self):
 			self.date = datetime.datetime.utcnow()
 
-	@property
-	def amount(self):
+	def get_amount(self, descriptor=None):
 		"""
-		The total of the amounts of the designations of this transaction.
+		The total of the amounts of the designations of this transaction
+		that don't match the descriptor (or all if no descriptor supplied).
 		"""
 		return sum(
 			item.amount
 			for item in
 				jaraco.util.itertools.always_iterable(self.designation)
+			if descriptor is None or descriptor == item.descriptor
 		)
+	amount = property(get_amount)
 
 	# for the purpose of sorting transactions chronologically, sort by date
 	def __lt__(self, other):
