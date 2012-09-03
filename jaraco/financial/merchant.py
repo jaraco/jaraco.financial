@@ -76,19 +76,29 @@ class Agent(object):
 class Merchant(object):
 	_merchants = dict()
 
-	def __init__(self, id, name):
+	def __init__(self, id, name, association_number):
 		self.id = id
 		self.name = name
+		self.association_number = association_number
 
 	@classmethod
 	def from_row(cls, row):
 		id = row['Merchant ID']
 		name = row['DBA Name'].strip()
-		merchant = cls._merchants.setdefault(id, cls(id, name))
+		assoc = row['Association Number'].strip()
+		merchant = cls._merchants.setdefault(id, cls(id, name), assoc)
 		return merchant
 
 	def __repr__(self):
 		return '{name} ({id})'.format(**vars(self))
+
+	@property
+	def association_name(self):
+		return {
+			'096367': 'advance',
+			'096403': 'residual',
+			'096509': 'simple',
+		}[self.association_number]
 
 class Transaction(object):
 	def __init__(self, date, amount):
