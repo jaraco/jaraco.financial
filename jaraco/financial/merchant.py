@@ -181,82 +181,81 @@ class Portfolio(dict):
 					txn.amount)
 		xlsxcessive.xlsx.save(workbook, filename)
 
-def build_portfolio():
-	"Build a portfolio from a report"
-	portfolio = Portfolio()
-	try:
-		with open('portfolio.pickle', 'rb') as pfp:
-			portfolio = pickle.load(pfp)
-	except:
-		pass
-	import sys
-	filename = sys.argv[1]
-	report = load_report(filename)
-	for agent in report:
-		agent_lgr = portfolio.setdefault(agent, ledger.Ledger())
-		for merchant, residuals in agent.accounts.iteritems():
-			for residual in residuals:
-				amount = parse_amount(residual.amount)
-				date = residual.date.as_object()
-				designation = ledger.SimpleDesignation(
-					descriptor = "Residuals Earned : " + unicode(merchant),
-					amount = amount,
-					)
-				txn = ledger.Transaction(date=date,
-					designation=designation)
-				txn.source = 'ISO statement'
-
-				if txn in agent_lgr:
-					# skip transactions that are already an exact match
-					print('.', end='')
-					continue
-
-				agent_lgr.add(txn)
-				# pay share to Cornerstone
-				designation = ledger.SimpleDesignation(
-					descriptor = "Residuals Shared : " + unicode(merchant),
-					amount = -txn.amount / 2,
-				)
-				txn = ledger.Transaction(date=date,
-					designation=designation)
-				txn.source = 'calculated'
-				agent_lgr.add(txn)
-
-				# account for advances
-				# first add the $400 advance if it's not already present
-				advance_descriptor = "Residual Advance : " + unicode(merchant)
-				add_advance = is_empty(
-					agent_lgr.query(descriptor=advance_descriptor, amount=400)
-				)
-				if add_advance:
+	def build(self):
+		"Build a portfolio from a report"
+		try:
+			with open('portfolio.pickle', 'rb') as pfp:
+				self = pickle.load(pfp)
+		except:
+			pass
+		import sys
+		filename = sys.argv[1]
+		report = load_report(filename)
+		for agent in report:
+			agent_lgr = self.setdefault(agent, ledger.Ledger())
+			for merchant, residuals in agent.accounts.iteritems():
+				for residual in residuals:
+					amount = parse_amount(residual.amount)
+					date = residual.date.as_object()
 					designation = ledger.SimpleDesignation(
-						descriptor = advance_descriptor,
-						amount = 400,
-					)
+						descriptor = "Residuals Earned : " + unicode(merchant),
+						amount = amount,
+						)
 					txn = ledger.Transaction(date=date,
-						designation = designation)
-					txn.source = 'inferred'
+						designation=designation)
+					txn.source = 'ISO statement'
+
+					if txn in agent_lgr:
+						# skip transactions that are already an exact match
+						print('.', end='')
+						continue
+
 					agent_lgr.add(txn)
-
-				# now deduct any outstanding advances
-				advance_txns = agent_lgr.query(descriptor=advance_descriptor)
-				outstanding = sum(
-					txn.get_amount(descriptor=advance_descriptor)
-					for txn in advance_txns)
-				if outstanding > 0:
-					# amount to repay
-					repay_adv = -min(outstanding, amount / 2)
+					# pay share to Cornerstone
 					designation = ledger.SimpleDesignation(
-						descriptor = advance_descriptor, amount=repay_adv)
+						descriptor = "Residuals Shared : " + unicode(merchant),
+						amount = -txn.amount / 2,
+					)
 					txn = ledger.Transaction(date=date,
-						designation = designation)
+						designation=designation)
 					txn.source = 'calculated'
 					agent_lgr.add(txn)
 
+					# account for advances
+					# first add the $400 advance if it's not already present
+					advance_descriptor = "Residual Advance : " + unicode(merchant)
+					add_advance = is_empty(
+						agent_lgr.query(descriptor=advance_descriptor, amount=400)
+					)
+					if add_advance:
+						designation = ledger.SimpleDesignation(
+							descriptor = advance_descriptor,
+							amount = 400,
+						)
+						txn = ledger.Transaction(date=date,
+							designation = designation)
+						txn.source = 'inferred'
+						agent_lgr.add(txn)
 
-	with open('portfolio.pickle', 'wb') as pfp:
-		pickle.dump(portfolio, pfp, protocol=pickle.HIGHEST_PROTOCOL)
-	portfolio.export('portfolio.xlsx')
+					# now deduct any outstanding advances
+					advance_txns = agent_lgr.query(descriptor=advance_descriptor)
+					outstanding = sum(
+						txn.get_amount(descriptor=advance_descriptor)
+						for txn in advance_txns)
+					if outstanding > 0:
+						# amount to repay
+						repay_adv = -min(outstanding, amount / 2)
+						designation = ledger.SimpleDesignation(
+							descriptor = advance_descriptor, amount=repay_adv)
+						txn = ledger.Transaction(date=date,
+							designation = designation)
+						txn.source = 'calculated'
+						agent_lgr.add(txn)
+
+
+		with open('portfolio.pickle', 'wb') as pfp:
+			pickle.dump(self, pfp, protocol=pickle.HIGHEST_PROTOCOL)
+		self.export('portfolio.xlsx')
 
 if __name__ == '__main__':
-	build_portfolio()
+	Portfolio().build()
