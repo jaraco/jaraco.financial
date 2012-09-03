@@ -51,6 +51,17 @@ class Ledger(list):
 	def balance(self):
 		return sum(txn.amount for txn in self)
 
+	def query(self, descriptor=None, amount=None):
+		for txn in self:
+			for designation in always_iterable(txn.designation):
+				if descriptor and designation.descriptor != descriptor:
+					continue
+				if amount is not None and designation.amount != amount:
+					continue
+				yield txn
+				# don't yield any transaction more than once
+				break
+
 class Named(object):
 	def __init__(self, name, *args, **kwargs):
 		super(Named, self).__init__(*args, **kwargs)
