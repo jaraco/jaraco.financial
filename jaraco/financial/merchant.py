@@ -11,6 +11,7 @@ import decimal
 import datetime
 import itertools
 
+from jaraco.util.itertools import is_empty
 from bs4 import BeautifulSoup
 import xlsxcessive.xlsx
 
@@ -86,7 +87,7 @@ class Merchant(object):
 		id = row['Merchant ID']
 		name = row['DBA Name'].strip()
 		assoc = row['Association Number'].strip()
-		merchant = cls._merchants.setdefault(id, cls(id, name), assoc)
+		merchant = cls._merchants.setdefault(id, cls(id, name, assoc))
 		return merchant
 
 	def __repr__(self):
@@ -219,6 +220,38 @@ def build_portfolio():
 					designation=designation)
 				txn.source = 'calculated'
 				agent_lgr.add(txn)
+
+				# account for advances
+				# first add the $400 advance if it's not already present
+				advance_descriptor = "Residual Advance : " + unicode(merchant)
+				add_advance = is_empty(
+					agent_lgr.query(descriptor=advance_descriptor, amount=400)
+				)
+				if add_advance:
+					designation = ledger.SimpleDesignation(
+						descriptor = advance_descriptor,
+						amount = 400,
+					)
+					txn = ledger.Transaction(date=date,
+						designation = designation)
+					txn.source = 'inferred'
+					agent_lgr.add(txn)
+
+				# now deduct any outstanding advances
+				advance_txns = agent_lgr.query(descriptor=advance_descriptor)
+				outstanding = sum(
+					txn.get_amount(descriptor=advance_descriptor)
+					for txn in advance_txns)
+				if outstanding > 0:
+					# amount to repay
+					repay_adv = -min(outstanding, amount)
+					designation = ledger.SimpleDesignation(
+						descriptor = advance_descriptor, amount=repay_adv)
+					txn = ledger.Transaction(date=date,
+						designation = designation)
+					txn.source = 'calculated'
+					agent_lgr.add(txn)
+
 
 	with open('portfolio.pickle', 'wb') as pfp:
 		pickle.dump(portfolio, pfp, protocol=pickle.HIGHEST_PROTOCOL)
