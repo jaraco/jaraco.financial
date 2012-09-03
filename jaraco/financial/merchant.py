@@ -221,41 +221,45 @@ class Portfolio(dict):
 					txn.source = 'calculated'
 					agent_lgr.add(txn)
 
-					# account for advances
-					# first add the $400 advance if it's not already present
-					advance_descriptor = "Residual Advance : " + unicode(merchant)
-					add_advance = is_empty(
-						agent_lgr.query(descriptor=advance_descriptor, amount=400)
-					)
-					if add_advance:
-						designation = ledger.SimpleDesignation(
-							descriptor = advance_descriptor,
-							amount = 400,
-						)
-						txn = ledger.Transaction(date=date,
-							designation = designation)
-						txn.source = 'inferred'
-						agent_lgr.add(txn)
-
-					# now deduct any outstanding advances
-					advance_txns = agent_lgr.query(descriptor=advance_descriptor)
-					outstanding = sum(
-						txn.get_amount(descriptor=advance_descriptor)
-						for txn in advance_txns)
-					if outstanding > 0:
-						# amount to repay
-						repay_adv = -min(outstanding, amount / 2)
-						designation = ledger.SimpleDesignation(
-							descriptor = advance_descriptor, amount=repay_adv)
-						txn = ledger.Transaction(date=date,
-							designation = designation)
-						txn.source = 'calculated'
-						agent_lgr.add(txn)
+					self.account_for_advances(merchant, agent_lgr, date,
+						amount)
 
 
 		with open('portfolio.pickle', 'wb') as pfp:
 			pickle.dump(self, pfp, protocol=pickle.HIGHEST_PROTOCOL)
 		self.export('portfolio.xlsx')
+
+	def account_for_advances(self, merchant, agent_lgr, date, amount):
+		"account for advances"
+		# first add the $400 advance if it's not already present
+		advance_descriptor = "Residual Advance : " + unicode(merchant)
+		add_advance = is_empty(
+			agent_lgr.query(descriptor=advance_descriptor, amount=400)
+		)
+		if add_advance:
+			designation = ledger.SimpleDesignation(
+				descriptor = advance_descriptor,
+				amount = 400,
+			)
+			txn = ledger.Transaction(date=date,
+				designation = designation)
+			txn.source = 'inferred'
+			agent_lgr.add(txn)
+
+		# now deduct any outstanding advances
+		advance_txns = agent_lgr.query(descriptor=advance_descriptor)
+		outstanding = sum(
+			txn.get_amount(descriptor=advance_descriptor)
+			for txn in advance_txns)
+		if outstanding > 0:
+			# amount to repay
+			repay_adv = -min(outstanding, amount / 2)
+			designation = ledger.SimpleDesignation(
+				descriptor = advance_descriptor, amount=repay_adv)
+			txn = ledger.Transaction(date=date,
+				designation = designation)
+			txn.source = 'calculated'
+			agent_lgr.add(txn)
 
 if __name__ == '__main__':
 	Portfolio().build()
