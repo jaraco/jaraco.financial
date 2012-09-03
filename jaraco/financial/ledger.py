@@ -53,7 +53,8 @@ class Ledger(list):
 
 	def query(self, descriptor=None, amount=None):
 		for txn in self:
-			for designation in always_iterable(txn.designation):
+			dsgns = jaraco.util.itertools.always_iterable(txn.designation)
+			for designation in dsgns:
 				if descriptor and designation.descriptor != descriptor:
 					continue
 				if amount is not None and designation.amount != amount:
