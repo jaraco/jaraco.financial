@@ -233,7 +233,7 @@ class Portfolio(dict):
 		"account for advances"
 
 		if merchant.association_name == 'simple':
-			# we don't account for advances with simple merchant associations
+			# don't account for advances with simple merchant associations
 			return
 
 		# first add the $400 advance if it's not already present
