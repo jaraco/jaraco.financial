@@ -17,7 +17,7 @@ dateutil_req = ['python-dateutil' + dateutil_ver]
 
 setup_params = dict(
 	name = name,
-	use_hg_version = dict(increment='0.1'),
+	use_hg_version = True,
 	description = 'Financial tools by jaraco',
 	author = 'Jason R. Coombs',
 	author_email = 'jaraco@jaraco.com',
