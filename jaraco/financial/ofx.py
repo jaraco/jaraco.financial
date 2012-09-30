@@ -41,13 +41,6 @@ def load_sites():
 	institution details.
 	"""
 
-	try:
-		import pkg_resources
-	except ImportError:
-		log.warning('setuptools not available - entry points cannot be '
-			'loaded')
-		return
-
 	group = 'financial_institutions'
 	entry_points = pkg_resources.iter_entry_points(group=group)
 	for ep in entry_points:
