@@ -75,7 +75,12 @@ def url_context(*args, **kwargs):
 	"""
 	Context wrapper around urlopen
 	"""
-	response = urllib2.urlopen(*args, **kwargs)
+	try:
+		response = urllib2.urlopen(*args, **kwargs)
+	except urllib2.HTTPError as err:
+		with open('err.txt', 'wb') as err_f:
+			err_f.write(err.read())
+		raise
 	try:
 		yield response
 	finally:
