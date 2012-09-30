@@ -332,7 +332,7 @@ class Query(Command):
 		return parser
 
 	@classmethod
-	def run(cls):
+	def run(cls, args):
 		creds = args.username, cls._get_password(args.site, args.username)
 		if not args.account:
 			# download account info
@@ -355,7 +355,7 @@ class DownloadAll(Command):
 		return parser
 
 	@classmethod
-	def run(cls):
+	def run(cls, args):
 		root = path.path('~/Documents/Financial').expanduser()
 		accounts = root / 'accounts.json'
 		with open(accounts) as f:
@@ -378,16 +378,13 @@ def get_args():
 	parser = argparse.ArgumentParser(usage=usage)
 	jaraco.util.logging.add_arguments(parser)
 	Command.add_subparsers(parser)
-	args = parser.parse_args()
-	globals().update(args = args)
-	return args
+	return parser.parse_args()
 
 def handle_command_line():
 	args = get_args()
 	jaraco.util.logging.setup(args)
 	load_sites()
-	args.action.run()
+	args.action.run(args)
 
-args = None
 if __name__ == "__main__":
 	handle_command_line()
