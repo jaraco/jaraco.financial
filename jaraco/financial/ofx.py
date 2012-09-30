@@ -116,16 +116,14 @@ class OFXClient(object):
 	Encapsulate an ofx client, config is a dict containing configuration.
 	"""
 
-	# set up some app ids
-	jaraco_fin = AppInfo('JRCF', get_version_id())
-	# pyofx is the version used by this script when it was standalone
+	# pyofx is appears to be work for many institutions
 	pyofx = AppInfo('PyOFX', '0100')
 	# if you have problems, fake quicken with one of these app ids
 	quicken_2009 = AppInfo('QWIN', '1800')
 	quicken_older = AppInfo('QWIN', '1200')
 	money_sunset = AppInfo('Money Plus', '1700')
 
-	app = jaraco_fin
+	app = pyofx
 
 	def __init__(self, config, user, password):
 		self.password = password
