@@ -11,10 +11,12 @@ import contextlib
 import logging
 import inspect
 import json
+import re
 
 import path
 import dateutil.parser
 import keyring
+import pkg_resources
 import jaraco.util.string as jstring
 from jaraco.util.string import local_format as lf
 import jaraco.util.logging
@@ -102,19 +104,35 @@ def sign_on_message(config):
 		),
 	)
 
+def get_version_id():
+	"""
+	OFX seems to like version ids that look like NNNN, so generate something
+	like that from our version.
+	"""
+	ver = pkg_resources.require('jaraco.financial')[0].version
+	ver_id = ''.join(re.findall('\d+', ver))
+	# first pad right to three digits (so last two digits are minor/patch ver)
+	ver_id = '{:0<3s}'.format(ver_id)
+	# now pad left to four digits (so first two digits are major ver)
+	ver_id = '{:0>4s}'.format(ver_id)
+	assert len(ver_id) == 4
+	return ver_id
 
 class OFXClient(object):
 	"""
-	Encapsulate an ofx client, config is a dict containg configuration.
+	Encapsulate an ofx client, config is a dict containing configuration.
 	"""
 
 	# set up some app ids
+	jaraco_fin = AppInfo('JRCF', get_version_id())
+	# pyofx is the version used by this script when it was standalone
 	pyofx = AppInfo('PyOFX', '0100')
 	# if you have problems, fake quicken with one of these app ids
 	quicken_2009 = AppInfo('QWIN', '1800')
 	quicken_older = AppInfo('QWIN', '1200')
+	money_sunset = AppInfo('Money Plus', '1700')
 
-	app = pyofx
+	app = jaraco_fin
 
 	def __init__(self, config, user, password):
 		self.password = password
