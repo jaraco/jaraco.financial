@@ -39,8 +39,6 @@ def load_sites():
 	institution details.
 	"""
 
-	logging.basicConfig()
-
 	try:
 		import pkg_resources
 	except ImportError:
@@ -364,6 +362,7 @@ class DownloadAll(Command):
 			accounts = json.load(f)
 		print('Found', len(accounts), 'accounts')
 		for account in accounts:
+			log.info('Downloading %(institution)s' % account)
 			username = account.get('username', getpass.getuser())
 			site = account['institution']
 			creds = username, cls._get_password(site, username)
@@ -372,16 +371,21 @@ class DownloadAll(Command):
 			cls.download(site, account['account'], dt_start, creds, acct_type)
 
 def get_args():
+	"""
+	Parse command-line arguments, including the Command and its arguments.
+	"""
 	usage = inspect.getdoc(handle_command_line)
 	parser = argparse.ArgumentParser(usage=usage)
 	jaraco.util.logging.add_arguments(parser)
 	Command.add_subparsers(parser)
-	globals().update(args = parser.parse_args())
+	args = parser.parse_args()
+	globals().update(args = args)
+	return args
 
 def handle_command_line():
-	load_sites()
-	get_args()
+	args = get_args()
 	jaraco.util.logging.setup(args)
+	load_sites()
 	args.action.run()
 
 args = None
