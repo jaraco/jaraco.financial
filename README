@@ -37,6 +37,42 @@ The author plans to add some of the following features:
 
 * Integrate some of the most common institutions.
 
+Accounts File
+-------------
+
+The "ofx download-all" command of `jaraco.financial` will retrieve the
+OFX transactions in a batch for a group of accounts defined in a JSON file.
+Currently, that file must be located in ~/Documents/Financial/accounts.json.
+The file should be a JSON list of objects,
+each with `institution` and `account` attributes. It should also have a
+`type` property of "checking", "savings", "creditline", or other appropriate
+OFX type. The institution should reference an institution installed with
+jaraco.financial, such as those defined in `jaraco.institutions
+<href="http://bitbucket.org/jaraco/jaraco.institutions">`_. The institution
+name must match exactly. Here is an
+example accounts.json::
+
+	[
+		{
+			"institution": "Bank of America",
+			"account": "12345679",
+			"type": "savings"
+		},
+		{
+			"institution": "Wells Fargo",
+			"account": "872634126",
+			"type": "moneymrkt"
+		},
+		{
+			"institution": "Chase (credit card)",
+			"account": "4000111122223333",
+			"username": "myusername"
+		}
+	]
+
+The `username` attribute must be included if the username of the local user
+(running the ofx command) differs from the account name on the account.
+
 Changes
 -------
 
