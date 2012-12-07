@@ -66,8 +66,8 @@ def patch_binary_for_payee_name_crash():
 		print("Backup already exists", file=sys.stderr)
 		raise SystemExit(1)
 	dll.copyfile(backup)
-	# open the file for read/write
-	with dll.open('a+b') as file:
+	# open the file for read and update (binary)
+	with dll.open('r+b') as file:
 		file.seek(0x3FACE8)
 		data = file.read(0xF6-0xE8+1)
 		assert ord(data[0xE8-0xE8]) == 0x85
