@@ -4,6 +4,7 @@ import argparse
 import subprocess
 import os
 import re
+import sys
 
 from path import path
 
@@ -43,3 +44,41 @@ def clean_temp():
 	for f in to_remove:
 		print('removing', f)
 		f.remove()
+
+def patch_binary_for_payee_name_crash():
+	"""
+	In `this blog entry
+	<http://blogs.msdn.com/b/oldnewthing/archive/2012/11/13/10367904.aspx>`,
+	the author has reverse-engineered the buggy MS Money code and devised
+	a fix by altering the binary. This method applies that patch
+	programmatically, doing some sanity checks to not incorrectly patch.
+
+	File offset 003FACE8: Change 85 to 8D
+	File offset 003FACED: Change 50 to 51
+	File offset 003FACF0: Change FF to 85
+	File offset 003FACF6: Change E8 to B9
+	"""
+	prog_dir = find_programfiles_dir('Microsoft Money Plus') / 'MnyCoreFiles'
+	dll = prog_dir / 'mnyob99.dll'
+	# back up the file
+	backup = prog_dir / 'mnyob99.dll.bak'
+	if backup.exists():
+		print("Backup already exists", file=sys.stderr)
+		raise SystemExit(1)
+	dll.copyfile(backup)
+	# open the file for read/write
+	with dll.open('a+b') as file:
+		file.seek(0x3FACE8)
+		data = file.read(0xF6-0xE8+1)
+		assert ord(data[0xE8-0xE8]) == 0x85
+		assert ord(data[0xED-0xE8]) == 0x50
+		assert ord(data[0xF0-0xE8]) == 0xFF
+		assert ord(data[0xF6-0xE8]) == 0xE8
+		file.seek(0x3FACE8)
+		file.write(chr(0x8D))
+		file.seek(0x3FACED)
+		file.write(chr(0x51))
+		file.seek(0x3FACF0)
+		file.write(chr(0x85))
+		file.seek(0x3FACF6)
+		file.write(chr(0xB9))
