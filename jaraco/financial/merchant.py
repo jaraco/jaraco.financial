@@ -252,15 +252,16 @@ class Portfolio(dict):
 			# don't account for advances with simple merchant associations
 			return
 
-		# first add the $400 advance if it's not already present
+		# first add the $200 advance (200 shared with cornerstone)
+		# if it's not already present
 		advance_descriptor = "Residual Advance : " + unicode(merchant)
 		add_advance = is_empty(
-			agent_lgr.query(descriptor=advance_descriptor, amount=400)
+			agent_lgr.query(descriptor=advance_descriptor, amount=200)
 		)
 		if add_advance:
 			designation = ledger.SimpleDesignation(
 				descriptor = advance_descriptor,
-				amount = 400,
+				amount = 200,
 			)
 			txn = ledger.Transaction(date=date,
 				designation = designation)
