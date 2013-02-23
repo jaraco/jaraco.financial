@@ -131,6 +131,12 @@ class Transaction(object):
 	def __unicode__(self):
 		return repr(self)
 
+	def __hash__(self):
+		return hash(self.date) + hash(self.amount)
+
+	def __eq__(self, other):
+		return self.date == other.date and self.amount == other.amount
+
 class Date(unicode):
 	@classmethod
 	def from_key(cls, key):
