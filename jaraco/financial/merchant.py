@@ -266,6 +266,8 @@ class Portfolio(dict):
 		transaction on that date to bring the account balance to zero.
 		"""
 		balance = agent_lgr.balance_through(date)
+		if balance == 0:
+			return
 		designation = ledger.SimpleDesignation(
 			descriptor = "Commissions Paid",
 			amount = -balance,
