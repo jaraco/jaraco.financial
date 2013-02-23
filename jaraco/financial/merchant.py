@@ -184,6 +184,8 @@ class Portfolio(dict):
 		workbook = xlsxcessive.xlsx.Workbook()
 		for agent, agent_lgr in self.iteritems():
 			sheet = workbook.new_sheet(agent.name)
+			sheet.col(number=1, width=11)
+			sheet.col(number=3, width=65)
 			w = SheetWriter(sheet)
 			w.write('Date', 'Payee', 'Category', 'Amount')
 			for txn in agent_lgr:
