@@ -71,7 +71,7 @@ class Agent(object):
 
 	def add_row(self, row):
 		merchant = Merchant.from_row(row)
-		transactions = Transaction.from_row(row)
+		transactions = AccountTransaction.from_row(row)
 		by_date = lambda txn: txn.date.as_object()
 		self.accounts[merchant] = sorted(transactions, key=by_date)
 
@@ -112,7 +112,11 @@ class Merchant(object):
 			'096590': 'simple',
 		}[self.association_number]
 
-class Transaction(object):
+class AccountTransaction(object):
+	"""
+	A specific transaction on an agent's account.
+	"""
+
 	def __init__(self, date, amount):
 		self.date = date
 		self.amount = amount
@@ -120,13 +124,13 @@ class Transaction(object):
 	@classmethod
 	def from_row(cls, row):
 		return [
-			Transaction(date, row[date])
+			cls(date, row[date])
 			for date in map(Date.from_key, row)
 			if date and row[date] != '$0.00'
 		]
 
 	def __repr__(self):
-		return 'Transaction({date}, {amount})'.format(**vars(self))
+		return 'AccountTransaction({date}, {amount})'.format(**vars(self))
 
 	def __unicode__(self):
 		return repr(self)
