@@ -75,6 +75,16 @@ class Agent(object):
 		by_date = lambda txn: txn.date.as_object()
 		self.accounts[merchant] = sorted(transactions, key=by_date)
 
+	def __hash__(self):
+		"""
+		Provide a hash for uniquely identifying agents.
+		"""
+		return int(self.id)
+
+	def __eq__(self, other):
+		return self.id == other.id
+
+
 class Merchant(object):
 	_merchants = dict()
 
@@ -186,7 +196,7 @@ class Portfolio(dict):
 		try:
 			with open('portfolio.pickle', 'rb') as pfp:
 				self = pickle.load(pfp)
-		except:
+		except Exception:
 			pass
 		import sys
 		filename = sys.argv[1]
