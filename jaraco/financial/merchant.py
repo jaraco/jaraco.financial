@@ -79,7 +79,7 @@ class Agent(object):
 		"""
 		Provide a hash for uniquely identifying agents.
 		"""
-		return int(self.id)
+		return hash(self.id)
 
 	def __eq__(self, other):
 		return self.id == other.id
