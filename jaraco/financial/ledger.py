@@ -33,6 +33,16 @@ class Transaction(object):
 	def __lt__(self, other):
 		return self.date < other.date
 
+	def _identity(self):
+		"Return the values that uniquely identify this transaction"
+		return (self.date, self.designation, self.payee)
+
+	def __eq__(self, other):
+		return self._identity() == other._identity()
+
+	def __hash__(self):
+		return hash(self._identity())
+
 class SplitDesignation(list):
 	"A list of SimpleDesignations"
 
@@ -41,6 +51,12 @@ class SimpleDesignation(object):
 		self.descriptor = descriptor
 		self.amount = amount
 		self.memo = memo
+
+	def __eq__(self, other):
+		return vars(self) == vars(other)
+
+	def __hash__(self):
+		return hash(vars(self))
 
 class Ledger(list):
 	"""
