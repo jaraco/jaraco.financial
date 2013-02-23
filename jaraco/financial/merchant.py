@@ -176,21 +176,27 @@ class SheetWriter(object):
 
 	def write(self, *values):
 		row = next(self.row_count)
-		for col, value in enumerate(values):
+		return [
 			self.sheet.cell(coords=(row, col), value=value)
+			for col, value in enumerate(values)
+		]
 
 class Portfolio(dict):
 	def export(self, filename):
 		workbook = xlsxcessive.xlsx.Workbook()
+		currency = workbook.stylesheet.new_format()
+		currency.number_format('"$"#,##0.00')
 		for agent, agent_lgr in self.iteritems():
 			sheet = workbook.new_sheet(agent.name)
 			sheet.col(number=1, width=11)
 			sheet.col(number=3, width=65)
+			sheet.col(number=4, width=10)
 			w = SheetWriter(sheet)
 			w.write('Date', 'Payee', 'Category', 'Amount')
 			for txn in agent_lgr:
-				w.write(txn.date, None, txn.designation.descriptor,
+				cells = w.write(txn.date, None, txn.designation.descriptor,
 					txn.amount)
+				cells[-1].format = currency
 		xlsxcessive.xlsx.save(workbook, filename)
 
 	def build(self):
