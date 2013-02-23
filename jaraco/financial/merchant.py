@@ -87,6 +87,7 @@ class Agent(object):
 
 class Merchant(object):
 	_merchants = dict()
+	prefix = '543684555'
 
 	def __init__(self, id, name, association_number):
 		self.id = id
@@ -102,7 +103,8 @@ class Merchant(object):
 		return merchant
 
 	def __repr__(self):
-		return '{name} ({id})'.format(**vars(self))
+		prefix, none, short_id = self.id.rpartition(self.prefix)
+		return '{name} ({id})'.format(name=self.name, id=short_id)
 
 	@property
 	def association_name(self):
