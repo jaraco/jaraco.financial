@@ -17,6 +17,7 @@ import path
 import dateutil.parser
 import keyring
 import pkg_resources
+import ofxparse
 import jaraco.util.string as jstring
 from jaraco.util.string import local_format as lf
 import jaraco.util.logging
@@ -320,6 +321,7 @@ class Command(object):
 			dtnow = datetime.datetime.now().strftime('%Y-%m-%d'),
 			**vars())
 		client.doQuery(query, filename)
+		return filename
 
 	@staticmethod
 	def _get_password(site, username):
@@ -366,6 +368,8 @@ class DownloadAll(Command):
 		default_start = datetime.datetime.now() - datetime.timedelta(days=31)
 		parser.add_argument('-d', '--start-date', default=default_start,
 			action=DateAction)
+		parser.add_argument('-v', '--validate', default=False,
+			action="store_true")
 		return parser
 
 	@classmethod
@@ -382,7 +386,18 @@ class DownloadAll(Command):
 			creds = username, cls._get_password(site, username)
 			acct_type = account.get('type', '').upper() or None
 			dt_start = args.start_date.strftime("%Y%m%d")
-			cls.download(site, account['account'], dt_start, creds, acct_type)
+			fn = cls.download(site, account['account'], dt_start, creds,
+				acct_type)
+			if args.validate:
+				cls.validate(fn)
+
+	@classmethod
+	def validate(cls, ofx_file):
+		parser = ofxparse.OfxParser()
+		with open(ofx_file) as reader:
+			doc = parser.parse(reader)
+		assert doc.account.statement
+
 
 def get_args():
 	"""
