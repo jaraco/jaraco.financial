@@ -35,7 +35,7 @@ setup_params = dict(
 	entry_points = {
 		'console_scripts': [
 			'fix-qif-date-format = jaraco.financial.qif:fix_dates_cmd',
-			'launch-in-money = jaraco.financial.msmoney:launch',
+			'launch-in-money = jaraco.financial.msmoney:launch_cmd',
 			'ofx = jaraco.financial.ofx:handle_command_line',
 			'clean-msmoney-temp = jaraco.financial.msmoney:clean_temp',
 			'record-document-hashes = jaraco.financial.records:send_hashes',

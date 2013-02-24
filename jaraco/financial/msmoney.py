@@ -5,6 +5,7 @@ import subprocess
 import os
 import re
 import sys
+import struct
 
 from path import path
 
@@ -25,11 +26,21 @@ def get_args():
 	parser.add_argument('filename')
 	return parser.parse_args()
 
-def launch():
+def launch_cmd():
 	"Command-line script to launch a file in MS Money"
-	money = find_money()
 	args = get_args()
-	subprocess.Popen([money, args.filename])
+	launch(args.filename)
+
+def make_unsigned(code):
+	return struct.unpack('L', struct.pack('l', code))[0]
+
+def launch(filename):
+	money = find_money()
+	# Money strangely does not like the filename to be a single parameter,
+	#  but expects each part of a filename containing spaces to be passed
+	#  as a separate parameter.
+	mnyimprt_cmd = [money] + filename.split(' ')
+	subprocess.check_call(mnyimprt_cmd)
 
 def clean_temp():
 	"""

@@ -23,6 +23,8 @@ from jaraco.util.string import local_format as lf
 import jaraco.util.logging
 import jaraco.util.meta
 
+from . import msmoney
+
 log = logging.getLogger(__name__)
 
 def load_sites():
@@ -320,6 +322,7 @@ class Command(object):
 		filename = '{site} {account} {dtnow}.ofx'.format(
 			dtnow = datetime.datetime.now().strftime('%Y-%m-%d'),
 			**vars())
+		filename = path.path(filename)
 		client.doQuery(query, filename)
 		return filename
 
@@ -370,6 +373,9 @@ class DownloadAll(Command):
 			action=DateAction)
 		parser.add_argument('-v', '--validate', default=False,
 			action="store_true")
+		parser.add_argument('-l', '--launch', default=False,
+			action="store_true", help="Launch the downloaded file in MS "
+				"Money (implies validate).")
 		return parser
 
 	@classmethod
@@ -386,10 +392,13 @@ class DownloadAll(Command):
 			creds = username, cls._get_password(site, username)
 			acct_type = account.get('type', '').upper() or None
 			dt_start = args.start_date.strftime("%Y%m%d")
-			fn = cls.download(site, account['account'], dt_start, creds,
+			ofx = cls.download(site, account['account'], dt_start, creds,
 				acct_type)
-			if args.validate:
-				cls.validate(fn)
+			if args.validate or args.launch:
+				cls.validate(ofx)
+			if args.launch:
+				msmoney.launch(ofx)
+				ofx.remove()
 
 	@classmethod
 	def validate(cls, ofx_file):
