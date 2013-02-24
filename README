@@ -76,6 +76,18 @@ The `username` attribute must be included if the username of the local user
 Changes
 -------
 
+1.4
+~~~
+
+* Added support for launching downloaded ofx in money.
+* Now validate downloaded OFX using ofxparse.
+* Added --like parameter to download all to download a subset of accounts.
+
+1.3
+~~~
+
+* Added routine for patching msmoney.exe for a bug revealed by Windows 8.
+
 1.0
 ~~~
 
