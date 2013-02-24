@@ -15,10 +15,14 @@ argparse_req = ['argparse'] if sys.version_info < (2, 7) else []
 dateutil_ver = '<2.0dev' if sys.version_info < (3,) else '>=2.0'
 dateutil_req = ['python-dateutil' + dateutil_ver]
 
+with open('README') as ldf:
+	long_description = ldf.read()
+
 setup_params = dict(
 	name = name,
 	use_hg_version = True,
 	description = 'Financial tools by jaraco',
+	long_description = long_description,
 	author = 'Jason R. Coombs',
 	author_email = 'jaraco@jaraco.com',
 	url = 'http://pypi.python.org/pypi/' + name,
