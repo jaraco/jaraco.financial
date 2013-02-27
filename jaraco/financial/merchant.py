@@ -37,7 +37,9 @@ def indent(lines):
 	return ['  ' + line for line in lines]
 
 class Agent(object):
-	share = 0.5
+	earn_rate = decimal.Decimal(0.5)
+	"percent of residual agent keeps"
+
 	_agents = dict()
 
 	def __init__(self, id, name):
@@ -75,6 +77,19 @@ class Agent(object):
 		transactions = AccountTransaction.from_row(row)
 		by_date = lambda txn: txn.date.as_object()
 		self.accounts[merchant] = sorted(transactions, key=by_date)
+
+	def share_residuals(self, my_lgr, merchant, date, amount):
+		"pay share to Cornerstone"
+
+		share_rate = 1 - self.earn_rate
+		designation = ledger.SimpleDesignation(
+			descriptor = "Residuals Shared : " + unicode(merchant),
+			amount = -amount*share_rate,
+		)
+		txn = ledger.Transaction(date=date,
+			designation=designation)
+		txn.source = 'calculated'
+		my_lgr.add(txn)
 
 	def __hash__(self):
 		"""
@@ -242,7 +257,7 @@ class Portfolio(dict):
 						continue
 
 					agent_lgr.add(txn)
-					self.share_residuals(merchant, agent_lgr, date, txn.amount)
+					agent.share_residuals(agent_lgr, merchant, date, txn.amount)
 					self.account_for_advances(merchant, agent_lgr, date,
 						amount)
 
@@ -273,18 +288,6 @@ class Portfolio(dict):
 			amount = -balance,
 		)
 		txn = ledger.Transaction(date=date, designation=designation)
-		agent_lgr.add(txn)
-
-	def share_residuals(self, merchant, agent_lgr, date, amount):
-		"pay share to Cornerstone"
-
-		designation = ledger.SimpleDesignation(
-			descriptor = "Residuals Shared : " + unicode(merchant),
-			amount = -amount / 2,
-		)
-		txn = ledger.Transaction(date=date,
-			designation=designation)
-		txn.source = 'calculated'
 		agent_lgr.add(txn)
 
 	def account_for_advances(self, merchant, agent_lgr, date, amount):
