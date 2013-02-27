@@ -36,6 +36,17 @@ class TranslinkReport(set):
 def indent(lines):
 	return ['  ' + line for line in lines]
 
+Obligation = collections.namedtuple('Obligation', 'agent share')
+
+class Obligations(dict):
+	"""
+	Map of merchant to set of Obligations
+	"""
+
+	def add(self, merchant, agent, share=0.5):
+		ob = Obligation(agent, decimal.Decimal(share))
+		self.setdefault(merchant, set()).add(ob)
+
 class Agent(object):
 	earn_rate = decimal.Decimal(0.5)
 	"percent of residual agent keeps"
@@ -46,6 +57,7 @@ class Agent(object):
 		self.id = id
 		self.name = name
 		self.accounts = dict()
+		self.obligations = Obligations()
 
 	def __repr__(self):
 		return '{name} ({id})'.format(**vars(self))
@@ -90,6 +102,23 @@ class Agent(object):
 			designation=designation)
 		txn.source = 'calculated'
 		my_lgr.add(txn)
+
+		remainder = amount + txn.amount
+		# share the remainder per obligations
+
+		if merchant in self.obligations:
+			for ob in self.obligations[merchant]:
+				designation = ledger.SimpleDesignation(
+					descriptor = "Residuals Shared : " + unicode(merchant),
+					amount = -remainder * ob.share)
+
+				txn = ledger.Transaction(date=date, payee=ob.agent.name,
+					designation=designation)
+				txn.source = 'calculated'
+				my_lgr.add(txn)
+
+				# TODO: add the inverse transaction into the other agent's lgr
+				# get_ledger(ob.agent).add(...)
 
 	def __hash__(self):
 		"""
