@@ -268,27 +268,37 @@ class Portfolio(dict):
 	def import_(self, tl_report):
 		"Import transactions from a TranslinkReport"
 		for agent in tl_report:
-			agent_lgr = self.setdefault(agent, ledger.Ledger())
-			for merchant, residuals in agent.accounts.iteritems():
-				for residual in residuals:
-					amount = parse_amount(residual.amount)
-					date = residual.date.as_object()
-					designation = ledger.SimpleDesignation(
-						descriptor = "Residuals Earned : " + unicode(merchant),
-						amount = amount,
-						)
-					txn = ledger.Transaction(date=date, payee='TransLink',
-						designation=designation)
-					txn.source = 'ISO statement'
+			self.setdefault(agent, ledger.Ledger())
 
-					if txn in agent_lgr:
-						# skip transactions that are already an exact match
-						continue
+	def add_obligations(self):
+		"stubbed"
 
-					agent_lgr.add(txn)
-					agent.share_residuals(agent_lgr, merchant, date, txn.amount)
-					self.account_for_advances(merchant, agent_lgr, date,
-						amount)
+	def process_residuals(self):
+		for agent in self:
+			self._process_agent_residuals(agent)
+
+	def _process_agent_residuals(self, agent):
+		agent_lgr = self[agent]
+		for merchant, residuals in agent.accounts.iteritems():
+			for residual in residuals:
+				amount = parse_amount(residual.amount)
+				date = residual.date.as_object()
+				designation = ledger.SimpleDesignation(
+					descriptor = "Residuals Earned : " + unicode(merchant),
+					amount = amount,
+					)
+				txn = ledger.Transaction(date=date, payee='TransLink',
+					designation=designation)
+				txn.source = 'ISO statement'
+
+				if txn in agent_lgr:
+					# skip transactions that are already an exact match
+					continue
+
+				agent_lgr.add(txn)
+				agent.share_residuals(agent_lgr, merchant, date, txn.amount)
+				self.account_for_advances(merchant, agent_lgr, date,
+					amount)
 
 	def pay_balances(self):
 		dates = sorted(set(txn.date
@@ -366,6 +376,8 @@ class Portfolio(dict):
 		with open(args.filename, 'rb') as pfb:
 			tl_report = TranslinkReport.load(pfb)
 			portfolio.import_(tl_report)
+		portfolio.add_obligations()
+		portfolio.process_residuals()
 		portfolio.pay_balances()
 		portfolio.save()
 		portfolio.export('portfolio.xlsx')
