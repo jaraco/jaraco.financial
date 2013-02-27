@@ -10,6 +10,7 @@ import pickle
 import decimal
 import datetime
 import itertools
+import argparse
 
 from jaraco.util.itertools import is_empty
 from bs4 import BeautifulSoup
@@ -17,26 +18,26 @@ import xlsxcessive.xlsx
 
 from . import ledger
 
-def load_report(source):
-	"""
-	Load a report as downloaded from Translink
-	"""
-	with open(source) as f:
-		data = f.read()
-	data = '<html>'+data+'</html>'
-	soup = BeautifulSoup(data)
+class TranslinkReport(set):
+	@classmethod
+	def load(cls, stream):
+		"""
+		Load a set of agents from a Translink .xls report
+		"""
+		data = stream.read()
+		data = '<html>'+data+'</html>'
+		soup = BeautifulSoup(data)
 
-	tables = map(parse_table, soup.find_all('table'))
-	assert len(tables) == 1
-	table = tables[0]
-	agents = set(map(Agent.from_row, table))
-
-	return agents
+		tables = map(parse_table, soup.find_all('table'))
+		assert len(tables) == 1
+		table = tables[0]
+		return cls(map(Agent.from_row, table))
 
 def indent(lines):
 	return ['  ' + line for line in lines]
 
 class Agent(object):
+	share = 0.5
 	_agents = dict()
 
 	def __init__(self, id, name):
@@ -194,6 +195,15 @@ class SheetWriter(object):
 		]
 
 class Portfolio(dict):
+	@classmethod
+	def load(cls):
+		try:
+			with open('portfolio.pickle', 'rb') as pfp:
+				return pickle.load(pfp)
+		except Exception:
+			pass
+		return cls()
+
 	def export(self, filename):
 		workbook = xlsxcessive.xlsx.Workbook()
 		currency = workbook.stylesheet.new_format()
@@ -211,25 +221,14 @@ class Portfolio(dict):
 				cells[-1].format = currency
 		xlsxcessive.xlsx.save(workbook, filename)
 
-	def build(self):
-		"Build a portfolio from a report"
-		try:
-			with open('portfolio.pickle', 'rb') as pfp:
-				self = pickle.load(pfp)
-		except Exception:
-			pass
-		import sys
-		filename = sys.argv[1]
-		report = load_report(filename)
-		for agent in report:
+	def import_(self, tl_report):
+		"Import transactions from a TranslinkReport"
+		for agent in tl_report:
 			agent_lgr = self.setdefault(agent, ledger.Ledger())
-			# keep track of the dates where transactions occurred
-			dates = set()
 			for merchant, residuals in agent.accounts.iteritems():
 				for residual in residuals:
 					amount = parse_amount(residual.amount)
 					date = residual.date.as_object()
-					dates.add(date)
 					designation = ledger.SimpleDesignation(
 						descriptor = "Residuals Earned : " + unicode(merchant),
 						amount = amount,
@@ -240,7 +239,6 @@ class Portfolio(dict):
 
 					if txn in agent_lgr:
 						# skip transactions that are already an exact match
-						print('.', end='')
 						continue
 
 					agent_lgr.add(txn)
@@ -256,11 +254,20 @@ class Portfolio(dict):
 
 					self.account_for_advances(merchant, agent_lgr, date,
 						amount)
-			[self.pay_balance(agent_lgr, date) for date in sorted(dates)]
 
+	def pay_balances(self):
+		dates = sorted(set(txn.date
+			for ledger in self.itervalues()
+			for txn in ledger
+			if txn.date.day == 1
+		))
+		for date in dates:
+			for agent_lgr in self.itervalues():
+				self.pay_balance(agent_lgr, date)
+
+	def save(self):
 		with open('portfolio.pickle', 'wb') as pfp:
 			pickle.dump(self, pfp, protocol=pickle.HIGHEST_PROTOCOL)
-		self.export('portfolio.xlsx')
 
 	def pay_balance(self, agent_lgr, date):
 		"""
@@ -315,5 +322,18 @@ class Portfolio(dict):
 			txn.source = 'calculated'
 			agent_lgr.add(txn)
 
+	@classmethod
+	def handle_command_line(cls):
+		parser = argparse.ArgumentParser()
+		parser.add_argument('filename')
+		args = parser.parse_args()
+		portfolio = cls.load()
+		with open(args.filename, 'rb') as pfb:
+			tl_report = TranslinkReport.load(pfb)
+			portfolio.import_(tl_report)
+		portfolio.pay_balances()
+		portfolio.save()
+		portfolio.export('portfolio.xlsx')
+
 if __name__ == '__main__':
-	Portfolio().build()
+	Portfolio().handle_command_line()
