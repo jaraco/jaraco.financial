@@ -242,16 +242,7 @@ class Portfolio(dict):
 						continue
 
 					agent_lgr.add(txn)
-					# pay share to Cornerstone
-					designation = ledger.SimpleDesignation(
-						descriptor = "Residuals Shared : " + unicode(merchant),
-						amount = -txn.amount / 2,
-					)
-					txn = ledger.Transaction(date=date,
-						designation=designation)
-					txn.source = 'calculated'
-					agent_lgr.add(txn)
-
+					self.share_residuals(merchant, agent_lgr, date, txn.amount)
 					self.account_for_advances(merchant, agent_lgr, date,
 						amount)
 
@@ -282,6 +273,18 @@ class Portfolio(dict):
 			amount = -balance,
 		)
 		txn = ledger.Transaction(date=date, designation=designation)
+		agent_lgr.add(txn)
+
+	def share_residuals(self, merchant, agent_lgr, date, amount):
+		"pay share to Cornerstone"
+
+		designation = ledger.SimpleDesignation(
+			descriptor = "Residuals Shared : " + unicode(merchant),
+			amount = -amount / 2,
+		)
+		txn = ledger.Transaction(date=date,
+			designation=designation)
+		txn.source = 'calculated'
 		agent_lgr.add(txn)
 
 	def account_for_advances(self, merchant, agent_lgr, date, amount):
