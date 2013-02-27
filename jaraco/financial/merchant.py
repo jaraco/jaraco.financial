@@ -86,7 +86,7 @@ class Agent(object):
 			descriptor = "Residuals Shared : " + unicode(merchant),
 			amount = -amount*share_rate,
 		)
-		txn = ledger.Transaction(date=date,
+		txn = ledger.Transaction(date=date, payee='Cornerstone',
 			designation=designation)
 		txn.source = 'calculated'
 		my_lgr.add(txn)
@@ -231,7 +231,7 @@ class Portfolio(dict):
 			w = SheetWriter(sheet)
 			w.write('Date', 'Payee', 'Category', 'Amount')
 			for txn in agent_lgr:
-				cells = w.write(txn.date, None, txn.designation.descriptor,
+				cells = w.write(txn.date, txn.payee, txn.designation.descriptor,
 					txn.amount)
 				cells[-1].format = currency
 		xlsxcessive.xlsx.save(workbook, filename)
