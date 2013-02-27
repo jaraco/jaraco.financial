@@ -248,7 +248,7 @@ class Portfolio(dict):
 						descriptor = "Residuals Earned : " + unicode(merchant),
 						amount = amount,
 						)
-					txn = ledger.Transaction(date=date,
+					txn = ledger.Transaction(date=date, payee='TransLink',
 						designation=designation)
 					txn.source = 'ISO statement'
 
@@ -308,7 +308,7 @@ class Portfolio(dict):
 				descriptor = advance_descriptor,
 				amount = 200,
 			)
-			txn = ledger.Transaction(date=date,
+			txn = ledger.Transaction(date=date, payee='TransLink',
 				designation = designation)
 			txn.source = 'inferred'
 			agent_lgr.add(txn)
@@ -323,7 +323,7 @@ class Portfolio(dict):
 			repay_adv = -min(outstanding, amount / 2)
 			designation = ledger.SimpleDesignation(
 				descriptor = advance_descriptor, amount=repay_adv)
-			txn = ledger.Transaction(date=date,
+			txn = ledger.Transaction(date=date, payee='TransLink',
 				designation = designation)
 			txn.source = 'calculated'
 			agent_lgr.add(txn)
