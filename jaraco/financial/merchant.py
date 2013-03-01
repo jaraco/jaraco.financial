@@ -92,20 +92,20 @@ class Agent(object):
 		by_date = lambda txn: txn.date.as_object()
 		self.accounts[merchant] = sorted(transactions, key=by_date)
 
-	def share_residuals(self, my_lgr, merchant, date, amount):
-		"pay share to Cornerstone"
+	def share_transaction(self, my_lgr, merchant, txn):
+		"pay share to Cornerstone and other obligations"
 
 		share_rate = 1 - self.earn_rate
 		designation = ledger.SimpleDesignation(
 			descriptor = "Residuals Shared : " + unicode(merchant),
-			amount = -amount*share_rate,
+			amount = -txn.amount*share_rate,
 		)
-		txn = ledger.Transaction(date=date, payee='Cornerstone',
+		s_txn = ledger.Transaction(date=txn.date, payee='Cornerstone',
 			designation=designation)
-		txn.source = 'calculated'
-		my_lgr.add(txn)
+		s_txn.source = 'calculated'
+		my_lgr.add(s_txn)
 
-		remainder = amount + txn.amount
+		remainder = txn.amount + s_txn.amount
 		# share the remainder per obligations
 
 		if merchant in self.obligations:
@@ -114,10 +114,10 @@ class Agent(object):
 					descriptor = "Residuals Shared : " + unicode(merchant),
 					amount = -remainder * ob.share)
 
-				txn = ledger.Transaction(date=date, payee=ob.agent.name,
+				s_txn = ledger.Transaction(date=txn.date, payee=ob.agent.name,
 					designation=designation)
 				txn.source = 'calculated'
-				my_lgr.add(txn)
+				my_lgr.add(s_txn)
 
 				# TODO: add the inverse transaction into the other agent's lgr
 				# get_ledger(ob.agent).add(...)
@@ -327,7 +327,7 @@ class Portfolio(dict):
 					continue
 
 				agent_lgr.add(txn)
-				agent.share_residuals(agent_lgr, merchant, date, txn.amount)
+				agent.share_transaction(agent_lgr, merchant, txn)
 				self.account_for_advances(merchant, agent_lgr, date,
 					amount)
 
