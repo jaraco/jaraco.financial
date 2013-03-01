@@ -95,9 +95,15 @@ class Agent(object):
 	def share_transaction(self, my_lgr, merchant, txn):
 		"pay share to Cornerstone and other obligations"
 
+		orig_category, sep, rest = txn.designation.descriptor.partition(' : ')
+		category = (
+			'Advances Shared' if 'advance' in orig_category.lower()
+			else 'Residuals Shared')
+		descriptor = ' : '.join([category, unicode(merchant)])
+
 		share_rate = 1 - self.earn_rate
 		designation = ledger.SimpleDesignation(
-			descriptor = "Residuals Shared : " + unicode(merchant),
+			descriptor = descriptor,
 			amount = -txn.amount*share_rate,
 		)
 		s_txn = ledger.Transaction(date=txn.date, payee='Cornerstone',
@@ -111,7 +117,7 @@ class Agent(object):
 		if merchant in self.obligations:
 			for ob in self.obligations[merchant]:
 				designation = ledger.SimpleDesignation(
-					descriptor = "Residuals Shared : " + unicode(merchant),
+					descriptor = descriptor,
 					amount = -remainder * ob.share)
 
 				s_txn = ledger.Transaction(date=txn.date, payee=ob.agent.name,
@@ -328,8 +334,7 @@ class Portfolio(dict):
 
 				agent_lgr.add(txn)
 				agent.share_transaction(agent_lgr, merchant, txn)
-				self.account_for_advances(merchant, agent_lgr, date,
-					amount)
+				self.account_for_advances(merchant, agent, date, amount)
 
 	def pay_balances(self):
 		dates = sorted(set(txn.date
@@ -360,28 +365,30 @@ class Portfolio(dict):
 		txn = ledger.Transaction(date=date, designation=designation)
 		agent_lgr.add(txn)
 
-	def account_for_advances(self, merchant, agent_lgr, date, amount):
+	def account_for_advances(self, merchant, agent, date, amount):
 		"account for advances"
+
+		agent_lgr = self[agent]
 
 		if merchant.association_name == 'simple':
 			# don't account for advances with simple merchant associations
 			return
 
-		# first add the $200 advance (200 shared with cornerstone)
-		# if it's not already present
+		# first add the $400 advance it's not already present
 		advance_descriptor = "Residual Advance : " + unicode(merchant)
 		add_advance = is_empty(
-			agent_lgr.query(descriptor=advance_descriptor, amount=200)
+			agent_lgr.query(descriptor=advance_descriptor, amount=400)
 		)
 		if add_advance:
 			designation = ledger.SimpleDesignation(
 				descriptor = advance_descriptor,
-				amount = 200,
+				amount = 400,
 			)
 			txn = ledger.Transaction(date=date, payee='TransLink',
 				designation = designation)
 			txn.source = 'inferred'
 			agent_lgr.add(txn)
+			agent.share_transaction(agent_lgr, merchant, txn)
 
 		# now deduct any outstanding advances
 		advance_txns = agent_lgr.query(descriptor=advance_descriptor)
