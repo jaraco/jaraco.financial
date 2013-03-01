@@ -36,7 +36,10 @@ class TranslinkReport(set):
 def indent(lines):
 	return ['  ' + line for line in lines]
 
-Obligation = collections.namedtuple('Obligation', 'agent share')
+class Obligation(collections.namedtuple('BaseObligation', 'agent share')):
+	def __str__(self):
+		return '{pct:.0f}% to {agent}'.format(
+			agent=self.agent, pct=self.share*100)
 
 class Obligations(dict):
 	"""
