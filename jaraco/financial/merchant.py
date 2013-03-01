@@ -93,40 +93,23 @@ class Agent(object):
 
 	def share_transaction(self, portfolio, my_lgr, merchant, txn):
 		"pay share to Cornerstone and other obligations"
-
-		orig_category, sep, rest = txn.designation.descriptor.partition(' : ')
-		category = (
-			'Advances Shared' if 'advance' in orig_category.lower()
-			else 'Residuals Shared')
-		descriptor = ' : '.join([category, unicode(merchant)])
-
 		share_rate = 1 - self.earn_rate
-		designation = ledger.SimpleDesignation(
-			descriptor = descriptor,
-			amount = -txn.amount*share_rate,
-		)
+
 		s_txn = ledger.Transaction(date=txn.date, payee='Cornerstone',
-			designation=designation)
+			designation=-txn.designation*share_rate)
 		s_txn.source = 'calculated'
 		my_lgr.add(s_txn)
 
-		remainder = txn.amount + s_txn.amount
-		# share the remainder per obligations
-
 		if merchant in self.obligations:
 			for ob in self.obligations[merchant]:
-				designation = ledger.SimpleDesignation(
-					descriptor = descriptor,
-					amount = -remainder * ob.share)
-
 				s_txn = ledger.Transaction(date=txn.date, payee=ob.agent.name,
-					designation=designation)
+					designation=-txn.designation*ob.share)
 				txn.source = 'calculated'
 				my_lgr.add(s_txn)
 
 				# create the inverse transaction for the other agent's ledger
 				i_txn = ledger.Transaction(date=txn.date, payee=self.name,
-					designation=designation.inverse())
+					designation=-s_txn.designation)
 
 				portfolio[ob.agent].add(i_txn)
 

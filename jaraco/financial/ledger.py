@@ -58,10 +58,12 @@ class SimpleDesignation(object):
 	def __hash__(self):
 		return hash(vars(self))
 
-	def inverse(self):
-		"Return the inverse designation of self"
+	def __neg__(self):
+		return self * -1
+
+	def __mul__(self, proportion):
 		return SimpleDesignation(descriptor=self.descriptor,
-			amount=-self.amount, memo=self.memo)
+			amount=proportion*self.amount, memo=self.memo)
 
 class Ledger(list):
 	"""
