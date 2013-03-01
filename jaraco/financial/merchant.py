@@ -102,6 +102,7 @@ class Agent(object):
 		self.name = name
 		self.accounts = dict()
 		self.obligations = Obligations()
+		self.liabilities = list()
 
 	def __repr__(self):
 		return '{name} ({id})'.format(**vars(self))
@@ -335,6 +336,32 @@ class Portfolio(dict):
 				for obl in agent.obligations[merchant]:
 					print('    ', obl)
 
+	def add_liabilities(self):
+		self._print_liabilities()
+		while True:
+			if raw_input('Add liabilities? ') != 'y':
+				break
+			agent_menu = ui.Menu(list(self))
+			agent = agent_menu.get_choice('which agent? ')
+			amount = raw_input('amount: ')
+			descriptor = raw_input('category: ')
+			payee = raw_input('payee: ')
+			start_date = raw_input('start date (blank for none)? ')
+			end_date = raw_input('end date (blank for none)? ')
+			limit = raw_input('limit (blank for none)? ')
+			designation = ledger.SimpleDesignation(
+				amount=parse_amount(amount),
+				descriptor=descriptor)
+			def parse_date(date_str):
+				if not date_str: return
+				return datetime.date(*map(int, date_str.split('/')))
+
+			agent.liabilities.add(Liability(payee, designation,
+				parse_date(start_date),
+				parse_date(end_date),
+				limit=float(limit) if limit else None,
+			))
+
 	def process_residuals(self):
 		for agent in self:
 			self._process_agent_residuals(agent)
@@ -441,6 +468,7 @@ class Portfolio(dict):
 			portfolio.import_(tl_report)
 		portfolio.add_obligations()
 		portfolio.process_residuals()
+		portfolio.add_liabilities()
 		portfolio.pay_balances()
 		portfolio.save()
 		portfolio.export('portfolio.xlsx')
