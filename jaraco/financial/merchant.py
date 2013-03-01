@@ -276,16 +276,7 @@ class Portfolio(dict):
 			self.setdefault(agent, ledger.Ledger())
 
 	def add_obligations(self):
-		print("Agent obligations are:")
-		for agent in self:
-			if not agent.obligations:
-				continue
-			print(agent)
-			for merchant in agent.obligations:
-				print('  For', merchant)
-				obl = agent.obligations[merchant]
-				for obl in agent.obligations[merchant]:
-					print('    ', obl)
+		self._print_obligations()
 		while True:
 			if raw_input('Add new obligation? ') != 'y':
 				break
@@ -303,6 +294,21 @@ class Portfolio(dict):
 			amount = int(amount)/100
 			agent.obligations.add(merchant=merchant, agent=obl_agent,
 				share=amount)
+
+	def _print_obligations(self):
+		if not any(agent.obligations for agent in self):
+			print("no Agent obligations set")
+			return
+		print("Agent obligations are:")
+		for agent in self:
+			if not agent.obligations:
+				continue
+			print(agent)
+			for merchant in agent.obligations:
+				print('  For', merchant)
+				obl = agent.obligations[merchant]
+				for obl in agent.obligations[merchant]:
+					print('    ', obl)
 
 	def process_residuals(self):
 		for agent in self:
