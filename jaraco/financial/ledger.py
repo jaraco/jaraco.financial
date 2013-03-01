@@ -58,6 +58,11 @@ class SimpleDesignation(object):
 	def __hash__(self):
 		return hash(vars(self))
 
+	def inverse(self):
+		"Return the inverse designation of self"
+		return SimpleDesignation(descriptor=self.descriptor,
+			amount=-self.amount, memo=self.memo)
+
 class Ledger(list):
 	"""
 	A list of transactions, sorted by date.

@@ -92,7 +92,7 @@ class Agent(object):
 		by_date = lambda txn: txn.date.as_object()
 		self.accounts[merchant] = sorted(transactions, key=by_date)
 
-	def share_transaction(self, my_lgr, merchant, txn):
+	def share_transaction(self, portfolio, my_lgr, merchant, txn):
 		"pay share to Cornerstone and other obligations"
 
 		orig_category, sep, rest = txn.designation.descriptor.partition(' : ')
@@ -125,8 +125,11 @@ class Agent(object):
 				txn.source = 'calculated'
 				my_lgr.add(s_txn)
 
-				# TODO: add the inverse transaction into the other agent's lgr
-				# get_ledger(ob.agent).add(...)
+				# create the inverse transaction for the other agent's ledger
+				i_txn = ledger.Transaction(date=txn.date, payee=self.name,
+					designation=designation.inverse())
+
+				portfolio[ob.agent].add(i_txn)
 
 	def __hash__(self):
 		"""
@@ -333,7 +336,7 @@ class Portfolio(dict):
 					continue
 
 				agent_lgr.add(txn)
-				agent.share_transaction(agent_lgr, merchant, txn)
+				agent.share_transaction(self, agent_lgr, merchant, txn)
 				self.account_for_advances(merchant, agent, date, amount)
 
 	def pay_balances(self):
@@ -388,7 +391,7 @@ class Portfolio(dict):
 				designation = designation)
 			txn.source = 'inferred'
 			agent_lgr.add(txn)
-			agent.share_transaction(agent_lgr, merchant, txn)
+			agent.share_transaction(self, agent_lgr, merchant, txn)
 
 		# now deduct any outstanding advances
 		advance_txns = agent_lgr.query(descriptor=advance_descriptor)
