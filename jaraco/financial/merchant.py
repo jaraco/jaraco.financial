@@ -42,6 +42,46 @@ class Obligation(collections.namedtuple('BaseObligation', 'agent share')):
 		return '{pct:.0f}% to {agent}'.format(
 			agent=self.agent, pct=self.share*100)
 
+class Liability(object):
+	"""
+	A recurring liability that creates a transaction in a ledger automatically
+	for a given date.
+	"""
+	def __init__(self, payee, designation, start_date=None,
+			end_date=None, limit=None):
+		self.__dict__.update(**vars())
+		assert isinstance(self.designation, ledger.SimpleDesignation)
+		del self.self
+
+	@staticmethod
+	def total_value(ledger, descriptor):
+		return sum(txn.get_amount(descriptor)
+			for txn in ledger
+			for designation in itertools.always_iterable(txn.designation)
+			if designation.descriptor == descriptor)
+
+	def add(self, ledger, date):
+		"Add a deduction from the ledger for this liability if appropriate"
+		total = self.total_value(ledger, self.designation.descriptor)
+		include = (
+			(not self.start_date or date >= self.start_date) and
+			(not self.end_date or date <= self.end_date) and
+			(not self.limit or self.limit > total)
+		)
+		if not include:
+			return
+		designation = self.designation
+		if self.designation.amount + total > self.limit:
+			designation = self.designation * 1
+			designation.amount = self.limit - total
+		txn = ledger.Transaction(
+			payee=self.payee,
+			date=date,
+			designation=designation,
+		)
+		ledger.add(txn)
+
+
 class Obligations(dict):
 	"""
 	Map of merchant to set of Obligations
