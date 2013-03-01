@@ -67,10 +67,7 @@ class Agent(object):
 	def __repr__(self):
 		return '{name} ({id})'.format(**vars(self))
 
-	def __str__(self):
-		return str(unicode(self))
-
-	def __unicode__(self):
+	def __details__(self):
 		lines = [repr(self)]
 		lines.extend(indent(self.merchant_lines()))
 		return '\n'.join(lines)
@@ -280,15 +277,12 @@ class Portfolio(dict):
 		while True:
 			if raw_input('Add new obligation? ') != 'y':
 				break
-			agent_menu = ui.Menu(list(self),
-				formatter=operator.attrgetter('name'))
+			agent_menu = ui.Menu(list(self))
 			agent = agent_menu.get_choice('which agent? ')
-			merchant_menu = ui.Menu(list(agent.accounts),
-				formatter=operator.attrgetter('name'))
+			merchant_menu = ui.Menu(list(agent.accounts))
 			merchant = merchant_menu.get_choice('which merchant? ')
 			other_agents = set(self) - set([agent])
-			agent_menu = ui.Menu(list(other_agents),
-				formatter=operator.attrgetter('name'))
+			agent_menu = ui.Menu(list(other_agents))
 			obl_agent = agent_menu.get_choice('pays to whom? ')
 			amount = raw_input('what percentage? ')
 			amount = int(amount)/100
