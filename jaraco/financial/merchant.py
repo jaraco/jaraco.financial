@@ -11,8 +11,10 @@ import decimal
 import datetime
 import itertools
 import argparse
+import operator
 
 from jaraco.util.itertools import is_empty
+from jaraco.util import ui
 from bs4 import BeautifulSoup
 import xlsxcessive.xlsx
 
@@ -274,7 +276,33 @@ class Portfolio(dict):
 			self.setdefault(agent, ledger.Ledger())
 
 	def add_obligations(self):
-		"stubbed"
+		print("Agent obligations are:")
+		for agent in self:
+			if not agent.obligations:
+				continue
+			print(agent)
+			for merchant in agent.obligations:
+				print('  For', merchant)
+				obl = agent.obligations[merchant]
+				for obl in agent.obligations[merchant]:
+					print('    ', obl)
+		while True:
+			if raw_input('Add new obligation? ') != 'y':
+				break
+			agent_menu = ui.Menu(list(self),
+				formatter=operator.attrgetter('name'))
+			agent = agent_menu.get_choice('which agent? ')
+			merchant_menu = ui.Menu(list(agent.accounts),
+				formatter=operator.attrgetter('name'))
+			merchant = merchant_menu.get_choice('which merchant? ')
+			other_agents = set(self) - set([agent])
+			agent_menu = ui.Menu(list(other_agents),
+				formatter=operator.attrgetter('name'))
+			obl_agent = agent_menu.get_choice('pays to whom? ')
+			amount = raw_input('what percentage? ')
+			amount = int(amount)/100
+			obligation = Obligation(obl_agent, amount)
+			agent.obligations[merchant] = obligation
 
 	def process_residuals(self):
 		for agent in self:
