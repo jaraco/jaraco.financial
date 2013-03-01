@@ -301,8 +301,8 @@ class Portfolio(dict):
 			obl_agent = agent_menu.get_choice('pays to whom? ')
 			amount = raw_input('what percentage? ')
 			amount = int(amount)/100
-			obligation = Obligation(obl_agent, amount)
-			agent.obligations[merchant] = obligation
+			agent.obligations.add(merchant=merchant, agent=obl_agent,
+				share=amount)
 
 	def process_residuals(self):
 		for agent in self:
