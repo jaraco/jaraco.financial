@@ -11,7 +11,6 @@ import decimal
 import datetime
 import itertools
 import argparse
-import operator
 
 from jaraco.util.itertools import is_empty
 from jaraco.util import ui
