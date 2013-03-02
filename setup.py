@@ -47,7 +47,7 @@ setup_params = dict(
 	},
 	install_requires=[
 		'keyring',
-		'jaraco.util>=6.3',
+		'jaraco.util>=6.3.1',
 		'path.py',
 		'ofxparse',
 	] + argparse_req + dateutil_req,

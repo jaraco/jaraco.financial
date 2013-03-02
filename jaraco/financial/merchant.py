@@ -12,10 +12,12 @@ import datetime
 import itertools
 import argparse
 
-from jaraco.util.itertools import is_empty, always_iterable
+import jaraco.util.logging
 from jaraco.util import ui
+from jaraco.util import cmdline
 from bs4 import BeautifulSoup
 import xlsxcessive.xlsx
+from jaraco.util.itertools import is_empty, always_iterable
 
 from . import ledger
 
@@ -487,9 +489,19 @@ class Portfolio(dict):
 	@classmethod
 	def handle_command_line(cls):
 		parser = argparse.ArgumentParser()
-		parser.add_argument('filename')
+		jaraco.util.logging.add_arguments(parser)
+		cmdline.Command.add_subparsers(parser)
 		args = parser.parse_args()
-		portfolio = cls.load()
+		args.action.run(args)
+
+class Import(cmdline.Command):
+	@classmethod
+	def add_arguments(cmd, parser):
+		parser.add_argument('filename')
+
+	@classmethod
+	def run(cls, args):
+		portfolio = Portfolio.load()
 		with open(args.filename, 'rb') as pfb:
 			tl_report = TranslinkReport.load(pfb)
 			portfolio.import_(tl_report)
