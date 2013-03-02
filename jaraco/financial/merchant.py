@@ -12,7 +12,7 @@ import datetime
 import itertools
 import argparse
 
-from jaraco.util.itertools import is_empty
+from jaraco.util.itertools import is_empty, always_iterable
 from jaraco.util import ui
 from bs4 import BeautifulSoup
 import xlsxcessive.xlsx
@@ -57,12 +57,12 @@ class Liability(object):
 	def total_value(ledger, descriptor):
 		return sum(txn.get_amount(descriptor)
 			for txn in ledger
-			for designation in itertools.always_iterable(txn.designation)
+			for designation in always_iterable(txn.designation)
 			if designation.descriptor == descriptor)
 
-	def add(self, ledger, date):
-		"Add a deduction from the ledger for this liability if appropriate"
-		total = self.total_value(ledger, self.designation.descriptor)
+	def add(self, lgr, date):
+		"Add a deduction from the lgr for this liability if appropriate"
+		total = self.total_value(lgr, self.designation.descriptor)
 		include = (
 			(not self.start_date or date >= self.start_date) and
 			(not self.end_date or date <= self.end_date) and
@@ -71,7 +71,7 @@ class Liability(object):
 		if not include:
 			return
 		designation = self.designation
-		if self.designation.amount + total > self.limit:
+		if self.limit and self.designation.amount + total > self.limit:
 			designation = self.designation * 1
 			designation.amount = self.limit - total
 		txn = ledger.Transaction(
@@ -79,7 +79,8 @@ class Liability(object):
 			date=date,
 			designation=designation,
 		)
-		ledger.add(txn)
+		if txn not in lgr:
+			lgr.add(txn)
 
 
 class Obligations(dict):
@@ -400,6 +401,20 @@ class Portfolio(dict):
 				agent.share_transaction(self, agent_lgr, merchant, txn)
 				self.account_for_advances(merchant, agent, date, amount)
 
+	def charge_liabilities(self):
+		"""
+
+		"""
+		dates = sorted(set(txn.date
+			for ledger in self.itervalues()
+			for txn in ledger
+			if txn.date.day == 1
+		))
+		for date in dates:
+			for agent, agent_lgr in self.iteritems():
+				for liability in agent.liabilities:
+					liability.add(agent_lgr, date)
+
 	def pay_balances(self):
 		dates = sorted(set(txn.date
 			for ledger in self.itervalues()
@@ -481,6 +496,7 @@ class Portfolio(dict):
 		portfolio.add_obligations()
 		portfolio.process_residuals()
 		portfolio.add_liabilities()
+		portfolio.charge_liabilities()
 		portfolio.pay_balances()
 		portfolio.save()
 		portfolio.export('portfolio.xlsx')
