@@ -18,7 +18,7 @@ import dateutil.parser
 import keyring
 import pkg_resources
 import ofxparse
-import jaraco.util.string as jstring
+import jaraco.util.cmdline as cmdline
 from jaraco.util.string import local_format as lf
 import jaraco.util.logging
 import jaraco.util.meta
@@ -290,22 +290,7 @@ class DateAction(argparse.Action):
 		value = dateutil.parser.parse(value)
 		setattr(namespace, self.dest, value)
 
-# todo: move the following class to jaraco.util
-class Command(object):
-	__metaclass__ = jaraco.util.meta.LeafClassesMeta
-
-	@classmethod
-	def add_subparsers(cls, parser):
-		subparsers = parser.add_subparsers()
-		[cmd_class.add_parser(subparsers) for cmd_class in cls._leaf_classes]
-
-	@classmethod
-	def add_parser(cls, subparsers):
-		cmd_string = jstring.words(cls.__name__).lowered().dash_separated()
-		parser = subparsers.add_parser(cmd_string)
-		parser.set_defaults(action=cls)
-		return parser
-
+class Command(cmdline.Command):
 	@staticmethod
 	def download(site, account, dt_start, creds, account_type=None):
 		config = sites[site]
@@ -337,8 +322,7 @@ class Command(object):
 
 class Query(Command):
 	@classmethod
-	def add_parser(cls, subparsers):
-		parser = super(Query, cls).add_parser(subparsers)
+	def add_arguments(cls, parser):
 		parser.add_argument('site', help="One of {0}".format(', '.join(sites)))
 		parser.add_argument('-u', '--username', default=getpass.getuser())
 		parser.add_argument('-a', '--account')
@@ -348,7 +332,6 @@ class Query(Command):
 		default_start = datetime.datetime.now() - datetime.timedelta(days=31)
 		parser.add_argument('-d', '--start-date', default=default_start,
 			action=DateAction)
-		return parser
 
 	@classmethod
 	def run(cls, args):
@@ -366,8 +349,7 @@ class Query(Command):
 
 class DownloadAll(Command):
 	@classmethod
-	def add_parser(cls, subparsers):
-		parser = super(DownloadAll, cls).add_parser(subparsers)
+	def add_arguments(cls, parser):
 		default_start = datetime.datetime.now() - datetime.timedelta(days=31)
 		parser.add_argument('-d', '--start-date', default=default_start,
 			action=DateAction)
@@ -378,7 +360,6 @@ class DownloadAll(Command):
 				"Money (implies validate).")
 		parser.add_argument('-k', '--like', help="Only download the accounts "
 			"whose names are like the supplied string.")
-		return parser
 
 	@classmethod
 	def run(cls, args):
