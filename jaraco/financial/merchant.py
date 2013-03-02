@@ -292,6 +292,7 @@ class Portfolio(dict):
 		for agent, agent_lgr in self.iteritems():
 			sheet = workbook.new_sheet(agent.name)
 			sheet.col(number=1, width=11)
+			sheet.col(number=2, width=18)
 			sheet.col(number=3, width=65)
 			sheet.col(number=4, width=10)
 			w = SheetWriter(sheet)
