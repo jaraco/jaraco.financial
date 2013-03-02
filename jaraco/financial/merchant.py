@@ -505,13 +505,32 @@ class Import(cmdline.Command):
 		with open(args.filename, 'rb') as pfb:
 			tl_report = TranslinkReport.load(pfb)
 			portfolio.import_(tl_report)
-		portfolio.add_obligations()
+		portfolio.save()
+
+class Process(cmdline.Command):
+	@classmethod
+	def run(cls, args):
+		portfolio = Portfolio.load()
 		portfolio.process_residuals()
-		portfolio.add_liabilities()
 		portfolio.charge_liabilities()
 		portfolio.pay_balances()
 		portfolio.save()
 		portfolio.export('portfolio.xlsx')
+
+class AddObligations(cmdline.Command):
+	@classmethod
+	def run(cls, args):
+		portfolio = Portfolio.load()
+		portfolio.add_obligations()
+		portfolio.save()
+
+class AddLiabilities(cmdline.Command):
+	@classmethod
+	def run(cls, args):
+		portfolio = Portfolio.load()
+		portfolio.add_liabilities()
+		portfolio.save()
+
 
 if __name__ == '__main__':
 	Portfolio().handle_command_line()
