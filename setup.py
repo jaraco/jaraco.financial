@@ -43,6 +43,8 @@ setup_params = dict(
 			'ofx = jaraco.financial.ofx:handle_command_line',
 			'clean-msmoney-temp = jaraco.financial.msmoney:clean_temp',
 			'record-document-hashes = jaraco.financial.records:send_hashes',
+			'cornerstone-portfolio = jaraco.financial.merchant:'
+				'Portfolio.handle_command_line',
 		],
 	},
 	install_requires=[
