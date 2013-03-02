@@ -99,8 +99,6 @@ class Agent(object):
 	earn_rate = decimal.Decimal(0.5)
 	"percent of residual agent keeps"
 
-	_agents = dict()
-
 	def __init__(self, id, name):
 		self.id = id
 		self.name = name
@@ -126,7 +124,7 @@ class Agent(object):
 	def from_row(cls, row):
 		id = row['Sales Rep Number'].strip()
 		name = row['Sales Rep Name'].strip()
-		agent = cls._agents.setdefault(id, cls(id, name))
+		agent = cls.factory(id, name)
 		agent.add_row(row)
 		return agent
 
@@ -302,10 +300,16 @@ class Portfolio(dict):
 				cells[-1].format = currency
 		xlsxcessive.xlsx.save(workbook, filename)
 
-	def import_(self, tl_report):
-		"Import transactions from a TranslinkReport"
-		for agent in tl_report:
-			self.setdefault(agent, ledger.Ledger())
+	def create_agent(self, id, name):
+		"""
+		Create a new agent (or re-use an existing one if present)
+		"""
+		agent = Agent(id, name)
+		self.setdefault(agent, ledger.Ledger())
+		agent_lookup = {
+			agent.id: agent for agent in self
+		}
+		return agent_lookup[id]
 
 	def add_obligations(self):
 		self._print_obligations()
@@ -502,9 +506,9 @@ class Import(cmdline.Command):
 	@classmethod
 	def run(cls, args):
 		portfolio = Portfolio.load()
+		Agent.factory = portfolio.create_agent
 		with open(args.filename, 'rb') as pfb:
-			tl_report = TranslinkReport.load(pfb)
-			portfolio.import_(tl_report)
+			TranslinkReport.load(pfb)
 		portfolio.save()
 
 class Process(cmdline.Command):
@@ -533,4 +537,4 @@ class AddLiabilities(cmdline.Command):
 
 
 if __name__ == '__main__':
-	Portfolio().handle_command_line()
+	Portfolio.handle_command_line()
