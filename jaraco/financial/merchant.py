@@ -4,6 +4,7 @@ A collection of Merchant-processing routines for Cornerstone, LLC.
 
 from __future__ import print_function, unicode_literals, division
 
+import os
 import re
 import collections
 import pickle
@@ -278,12 +279,10 @@ class SheetWriter(object):
 class Portfolio(dict):
 	@classmethod
 	def load(cls):
-		try:
-			with open('portfolio.pickle', 'rb') as pfp:
-				return pickle.load(pfp)
-		except Exception:
-			pass
-		return cls()
+		if not os.path.isfile('portfolio.pickle'):
+			return cls()
+		with open('portfolio.pickle', 'rb') as pfp:
+			return pickle.load(pfp)
 
 	def export(self, filename):
 		workbook = xlsxcessive.xlsx.Workbook()
