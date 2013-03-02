@@ -356,11 +356,23 @@ class Portfolio(dict):
 				if not date_str: return
 				return datetime.date(*map(int, date_str.split('/')))
 
-			agent.liabilities.add(Liability(payee, designation,
+			agent.liabilities.append(Liability(payee, designation,
 				parse_date(start_date),
 				parse_date(end_date),
 				limit=float(limit) if limit else None,
 			))
+
+	def _print_liabilities(self):
+		if not any(agent.liabilities for agent in self):
+			print("no Agent liabilities")
+			return
+		print("Agent liabilities are:")
+		for agent in self:
+			if not agent.liabilities:
+				continue
+			print(agent)
+			for liability in agent.liabilities:
+				print('  ', liability)
 
 	def process_residuals(self):
 		for agent in self:
