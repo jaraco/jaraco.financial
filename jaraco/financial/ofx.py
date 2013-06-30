@@ -10,6 +10,7 @@ import logging
 import inspect
 import json
 import re
+import httplib
 
 import requests
 import path
@@ -394,9 +395,18 @@ def get_args():
 	Command.add_subparsers(parser)
 	return parser.parse_args()
 
+def setup_requests_logging(level):
+	requests_log = logging.getLogger("requests.packages.urllib3")
+	requests_log.setLevel(level)
+	requests_log.propagate = True
+
+	# enable debugging at httplib level (requests->urllib3->httplib)
+	httplib.HTTPConnection.debuglevel = level <= logging.DEBUG
+
 def handle_command_line():
 	args = get_args()
 	jaraco.util.logging.setup(args)
+	setup_requests_logging(args.log_level)
 	load_sites()
 	args.action.run(args)
 
