@@ -52,6 +52,7 @@ setup_params = dict(
 		'jaraco.util>=6.3.1',
 		'path.py',
 		'ofxparse',
+		'requests',
 	] + argparse_req + dateutil_req,
 	extras_require = {
 	},

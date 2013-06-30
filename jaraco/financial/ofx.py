@@ -1,18 +1,17 @@
 from __future__ import absolute_import, unicode_literals, print_function
 
-import urllib2
 import uuid
 import argparse
 import getpass
 import itertools
 import collections
 import datetime
-import contextlib
 import logging
 import inspect
 import json
 import re
 
+import requests
 import path
 import dateutil.parser
 import keyring
@@ -73,21 +72,14 @@ def _genuuid():
 
 AppInfo = collections.namedtuple('AppInfo', 'id version')
 
-@contextlib.contextmanager
-def url_context(*args, **kwargs):
+def handle_response(resp):
 	"""
-	Context wrapper around urlopen
+	handle a requests Response
 	"""
-	try:
-		response = urllib2.urlopen(*args, **kwargs)
-	except urllib2.HTTPError as err:
+	if not resp.ok:
 		with open('err.txt', 'wb') as err_f:
-			err_f.write(err.read())
-		raise
-	try:
-		yield response
-	finally:
-		response.close()
+			err_f.write(resp.raw.read())
+	resp.raise_for_status()
 
 def sign_on_message(config):
 	fidata = [_field("ORG", config["fiorg"])]
@@ -142,6 +134,7 @@ class OFXClient(object):
 		config["password"] = password
 		config.setdefault('appid', self.app.id)
 		config.setdefault('appver', self.app.version)
+		self.session = requests.Session()
 
 	def _cookie(self):
 		self.cookie += 1
@@ -266,23 +259,21 @@ class OFXClient(object):
 			"Content-type": "application/x-ofx",
 			"Accept": "*/*, application/x-ofx",
 		}
-		request = urllib2.Request(
-			self.config["url"],
-			data = query.encode('cp1252'),
-			headers = headers,
+
+		resp = self.session.get(
+			url=self.config["url"],
+			data=query.encode('cp1252'),
+			headers=headers,
 		)
 
-		url = self.config["url"]
-		log.debug(lf("URL is {url}; query is {query}"))
+		handle_response(resp)
 
-		with url_context(request) as response:
-			payload = response.read()
-			content_type = response.headers.getheader('Content-type')
-			if content_type != 'application/x-ofx':
-				log.warning(lf('Unexpected content type {content_type}'))
+		content_type = resp.headers['Content-type']
+		if content_type != 'application/x-ofx':
+			log.warning(lf('Unexpected content type {content_type}'))
 
-		with file(name, "w") as outfile:
-			outfile.write(payload)
+		with open(name, "wb") as outfile:
+			outfile.write(resp.raw.read())
 
 class DateAction(argparse.Action):
 	def __call__(self, parser, namespace, values, option_string=None):
