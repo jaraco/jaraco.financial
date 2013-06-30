@@ -268,7 +268,7 @@ class OFXClient(object):
 		}
 		request = urllib2.Request(
 			self.config["url"],
-			data = query,
+			data = query.encode('cp1252'),
 			headers = headers,
 		)
 
