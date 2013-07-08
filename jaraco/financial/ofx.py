@@ -261,7 +261,7 @@ class OFXClient(object):
 			"Accept": "*/*, application/x-ofx",
 		}
 
-		resp = self.session.get(
+		resp = self.session.post(
 			url=self.config["url"],
 			data=query.encode('cp1252'),
 			headers=headers,
