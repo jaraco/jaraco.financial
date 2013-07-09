@@ -86,8 +86,10 @@ def sign_on_message(config):
 	fidata = [_field("ORG", config["fiorg"])]
 	if 'fid' in config:
 		fidata += [_field("FID", config["fid"])]
-	return _tag("SIGNONMSGSRQV1",
-		_tag("SONRQ",
+	return _tag(
+		"SIGNONMSGSRQV1",
+		_tag(
+			"SONRQ",
 			_field("DTCLIENT", _date()),
 			_field("USERID", config["user"]),
 			_field("USERPASS", config["password"]),
@@ -152,12 +154,14 @@ class OFXClient(object):
 	# this is from _ccreq below and reading page 176 of the latest OFX doc.
 	def _bareq(self, bankid, acctid, dtstart, accttype):
 		req = _tag("STMTRQ",
-			_tag("BANKACCTFROM",
+			_tag(
+				"BANKACCTFROM",
 				_field("BANKID", bankid),
 				_field("ACCTID", acctid),
 				_field("ACCTTYPE", accttype),
 			),
-			_tag("INCTRAN",
+			_tag(
+				"INCTRAN",
 				_field("DTSTART", dtstart),
 				_field("INCLUDE", "Y"),
 			),
@@ -165,9 +169,12 @@ class OFXClient(object):
 		return self._message("BANK", "STMT", req)
 
 	def _ccreq(self, acctid, dtstart):
-		req = _tag("CCSTMTRQ",
-			_tag("CCACCTFROM", _field("ACCTID", acctid)),
-			_tag("INCTRAN",
+		req = _tag(
+			"CCSTMTRQ",
+			_tag(
+				"CCACCTFROM", _field("ACCTID", acctid)),
+			_tag(
+				"INCTRAN",
 				_field("DTSTART", dtstart),
 				_field("INCLUDE", "Y"),
 			),
@@ -176,17 +183,21 @@ class OFXClient(object):
 
 	def _invstreq(self, brokerid, acctid, dtstart):
 		dtnow = _date()
-		req = _tag("INVSTMTRQ",
-			_tag("INVACCTFROM",
+		req = _tag(
+				"INVSTMTRQ",
+			_tag(
+				"INVACCTFROM",
 				_field("BROKERID", brokerid),
 				_field("ACCTID", acctid),
 			),
-			_tag("INCTRAN",
+			_tag(
+				"INCTRAN",
 				_field("DTSTART", dtstart),
 				_field("INCLUDE", "Y"),
 			),
 			_field("INCOO", "Y"),
-			_tag("INCPOS",
+			_tag(
+				"INCPOS",
 				_field("DTASOF", dtnow),
 				_field("INCLUDE", "Y"),
 			),
@@ -196,7 +207,8 @@ class OFXClient(object):
 
 	def _message(self, msgType, trnType, request):
 		return _tag(msgType + "MSGSRQV1",
-			_tag(trnType + "TRNRQ",
+			_tag(
+				trnType + "TRNRQ",
 				_field("TRNUID", _genuuid()),
 				_field("CLTCOOKIE", self._cookie()),
 				request,
@@ -221,7 +233,8 @@ class OFXClient(object):
 		"""Bank account statement request"""
 		return '\r\n'.join([
 			self._header(),
-			_tag("OFX",
+			_tag(
+				"OFX",
 				self.sign_on(),
 				self._bareq(bankid, acctid, dtstart, accttype),
 			),
@@ -231,7 +244,8 @@ class OFXClient(object):
 		"""CC Statement request"""
 		return '\r\n'.join([
 			self._header(),
-			_tag("OFX",
+			_tag(
+				"OFX",
 				self.sign_on(),
 				self._ccreq(acctid, dtstart),
 			),
@@ -240,7 +254,8 @@ class OFXClient(object):
 	def acctQuery(self, dtstart):
 		return '\r\n'.join([
 			self._header(),
-			_tag("OFX",
+			_tag(
+				"OFX",
 				self.sign_on(),
 				self._acctreq(dtstart),
 			),
@@ -249,7 +264,8 @@ class OFXClient(object):
 	def invstQuery(self, brokerid, acctid, dtstart):
 		return '\r\n'.join([
 			self._header(),
-			_tag("OFX",
+			_tag(
+				"OFX",
 				self.sign_on(),
 				self._invstreq(brokerid, acctid, dtstart),
 			),
@@ -318,8 +334,10 @@ class Query(Command):
 		parser.add_argument('site', help="One of {0}".format(', '.join(sites)))
 		parser.add_argument('-u', '--username', default=getpass.getuser())
 		parser.add_argument('-a', '--account')
-		parser.add_argument('-t', '--account-type',
-			help="Required if retrieving bank statement, should be CHECKING, SAVINGS, ...",
+		parser.add_argument(
+			'-t', '--account-type',
+			help="Required if retrieving bank statement, should be CHECKING, "
+				"SAVINGS, ...",
 		)
 		default_start = datetime.datetime.now() - datetime.timedelta(days=31)
 		parser.add_argument('-d', '--start-date', default=default_start,
