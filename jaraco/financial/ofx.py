@@ -378,10 +378,14 @@ class DownloadAll(Command):
 		accounts = root / 'accounts.json'
 		with open(accounts) as f:
 			accounts = json.load(f)
-		print('Found', len(accounts), 'accounts')
-		for account in accounts:
-			if args.like.lower() not in account['institution'].lower():
-				continue
+		matching_accounts = [
+			account for account in accounts
+			if args.like.lower() in account['institution'].lower()
+		]
+		print('Matching {}/{} accounts'.format(
+			len(matching_accounts),
+			len(accounts)))
+		for account in matching_accounts:
 			log.info('Downloading %(institution)s' % account)
 			username = account.get('username', getpass.getuser())
 			site = account['institution']
