@@ -428,7 +428,7 @@ def setup_requests_logging(level):
 
 def handle_command_line():
 	args = get_args()
-	jaraco.util.logging.setup(args)
+	jaraco.util.logging.setup(args, format="%(message)s")
 	setup_requests_logging(args.log_level)
 	load_sites()
 	args.action.run(args)
