@@ -79,7 +79,7 @@ def handle_response(resp):
 	"""
 	if not resp.ok:
 		with open('err.txt', 'wb') as err_f:
-			err_f.write(resp.raw.read())
+			err_f.write(resp.content)
 	resp.raise_for_status()
 
 def sign_on_message(config):
@@ -274,7 +274,7 @@ class OFXClient(object):
 			log.warning(lf('Unexpected content type {content_type}'))
 
 		with open(name, "wb") as outfile:
-			outfile.write(resp.raw.read())
+			outfile.write(resp.content)
 
 class DateAction(argparse.Action):
 	def __call__(self, parser, namespace, values, option_string=None):
