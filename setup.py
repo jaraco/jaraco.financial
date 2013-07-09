@@ -63,7 +63,6 @@ setup_params = dict(
 	setup_requires=[
 		'hgtools>=0.4',
 	],
-	use_2to3=True,
 )
 
 if __name__ == '__main__':
