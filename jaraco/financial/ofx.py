@@ -10,7 +10,6 @@ import logging
 import inspect
 import json
 import re
-import httplib
 
 import requests
 import path
@@ -22,6 +21,7 @@ import jaraco.util.cmdline as cmdline
 from jaraco.util.string import local_format as lf
 import jaraco.util.logging
 import jaraco.util.meta
+from requests.packages.urllib3.connectionpool import HTTPConnection
 
 from . import msmoney
 
@@ -400,8 +400,8 @@ def setup_requests_logging(level):
 	requests_log.setLevel(level)
 	requests_log.propagate = True
 
-	# enable debugging at httplib level (requests->urllib3->httplib)
-	httplib.HTTPConnection.debuglevel = level <= logging.DEBUG
+	# enable debugging at httplib level
+	HTTPConnection.debuglevel = level <= logging.DEBUG
 
 def handle_command_line():
 	args = get_args()
