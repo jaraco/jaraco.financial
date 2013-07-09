@@ -369,7 +369,8 @@ class DownloadAll(Command):
 			action="store_true", help="Launch the downloaded file in MS "
 				"Money (implies validate).")
 		parser.add_argument('-k', '--like', help="Only download the accounts "
-			"whose names are like the supplied string.")
+			"whose names are like the supplied string.",
+			default='')
 
 	@classmethod
 	def run(cls, args):
@@ -379,7 +380,7 @@ class DownloadAll(Command):
 			accounts = json.load(f)
 		print('Found', len(accounts), 'accounts')
 		for account in accounts:
-			if args.like and not args.like.lower() in account['institution'].lower():
+			if args.like.lower() not in account['institution'].lower():
 				continue
 			log.info('Downloading %(institution)s' % account)
 			username = account.get('username', getpass.getuser())
