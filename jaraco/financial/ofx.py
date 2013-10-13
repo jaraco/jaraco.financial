@@ -386,7 +386,7 @@ class DownloadAll(Command):
 			len(matching_accounts),
 			len(accounts)))
 		for account in matching_accounts:
-			log.info('Downloading %(institution)s' % account)
+			log.info('Downloading %(institution)s (%(account)s)' % account)
 			username = account.get('username', getpass.getuser())
 			site = account['institution']
 			creds = username, cls._get_password(site, username)
