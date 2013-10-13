@@ -127,6 +127,7 @@ class OFXClient(object):
 	money_sunset = AppInfo('Money Plus', '1700')
 
 	app = pyofx
+	session = requests.Session()
 
 	def __init__(self, config, user, password):
 		self.password = password
@@ -137,7 +138,6 @@ class OFXClient(object):
 		config["password"] = password
 		config.setdefault('appid', self.app.id)
 		config.setdefault('appver', self.app.version)
-		self.session = requests.Session()
 
 	def _cookie(self):
 		self.cookie += 1
