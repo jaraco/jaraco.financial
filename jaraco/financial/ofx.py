@@ -403,7 +403,7 @@ class DownloadAll(Command):
 	@classmethod
 	def validate(cls, ofx_file):
 		parser = ofxparse.OfxParser()
-		with open(ofx_file) as reader:
+		with open(ofx_file, 'rb') as reader:
 			doc = parser.parse(reader)
 		assert doc.account.statement
 
