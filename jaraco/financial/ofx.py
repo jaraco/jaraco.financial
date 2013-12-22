@@ -23,11 +23,22 @@ import jaraco.util.logging
 import jaraco.util.meta
 from requests.packages.urllib3.connectionpool import HTTPConnection
 
+try:
+	import yaml
+except ImportError:
+	pass
+
 from . import msmoney
 
 log = logging.getLogger(__name__)
 
+sites = dict()
+
 def load_sites():
+	_load_sites_from_entry_points()
+	_load_sites_from_file()
+
+def _load_sites_from_entry_points():
 	"""
 	Locate all setuptools entry points by the name 'financial_institutions'
 	and initialize them.
@@ -54,7 +65,16 @@ def load_sites():
 		except Exception:
 			log.exception("Error initializing institution %s." % ep)
 
-sites = dict()
+def _load_sites_from_file():
+	if 'yaml' not in globals():
+		return
+	sites_file = path.path('~/Documents/Financial/institutions.yaml')
+	sites_file = sites_file.expanduser()
+	if not sites_file.exists():
+		return
+	with sites_file.open() as stream:
+		new_sites = yaml.safe_load(stream)
+	sites.update(new_sites)
 
 def _field(tag, value):
 	return lf('<{tag}>{value}')
@@ -407,6 +427,10 @@ class DownloadAll(Command):
 			doc = parser.parse(reader)
 		assert doc.account.statement
 
+class ListInstitutions(Command):
+	@classmethod
+	def run(cls, args):
+		list(map(print, sites))
 
 def get_args():
 	"""
