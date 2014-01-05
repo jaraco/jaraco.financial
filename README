@@ -85,11 +85,17 @@ To check that your institutions are being loaded correctly, use the
 Changes
 -------
 
+1.6
+~~~
+
+* YAML format is now the preferred format for accounts definitions. Support
+  for JSON-formatted accounts definitions is still supported but deprecated.
+
 1.5
 ~~~
 
 * Added support for loading institutions from a YAML file (requires PyYAML
-  to be installed.
+  to be installed).
 * Added the ofx command list-institutions.
 
 1.4
