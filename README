@@ -41,16 +41,13 @@ Accounts File
 -------------
 
 The "ofx download-all" command of `jaraco.financial` will retrieve the
-OFX transactions in a batch for a group of accounts defined in a JSON file.
-Currently, that file must be located in ~/Documents/Financial/accounts.json.
-The file should be a JSON list of objects,
+OFX transactions in a batch for a group of accounts defined in a YAML file.
+Currently, that file must be located in ~/Documents/Financial/accounts.yaml.
+The file should be a list of objects,
 each with `institution` and `account` attributes. It should also have a
 `type` property of "checking", "savings", "creditline", or other appropriate
-OFX type. The institution should reference an institution installed with
-jaraco.financial, such as those defined in `jaraco.institutions
-<href="http://bitbucket.org/jaraco/jaraco.institutions">`_. The institution
-name must match exactly. Here is an
-example accounts.json::
+OFX type. The institution must match exactly an institution as defined below.
+Here is an example accounts.yaml::
 
     [
         {

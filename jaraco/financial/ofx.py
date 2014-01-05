@@ -10,6 +10,7 @@ import logging
 import inspect
 import json
 import re
+import warnings
 
 import requests
 import path
@@ -396,9 +397,7 @@ class DownloadAll(Command):
 	@classmethod
 	def run(cls, args):
 		root = path.path('~/Documents/Financial').expanduser()
-		accounts = root / 'accounts.json'
-		with open(accounts) as f:
-			accounts = json.load(f)
+		accounts = cls.load_accounts_yaml(root) or cls.load_accounts_json(root)
 		matching_accounts = [
 			account for account in accounts
 			if args.like.lower() in account['institution'].lower()
@@ -427,6 +426,27 @@ class DownloadAll(Command):
 		with open(ofx_file, 'rb') as reader:
 			doc = parser.parse(reader)
 		assert doc.account.statement
+
+	@classmethod
+	def load_accounts_yaml(cls, root):
+		"""
+		Preferred mechanism for defining accounts.
+		"""
+		accounts = root / 'accounts.yaml'
+		if not accounts.exists() or 'yaml' not in globals():
+			return
+		with accounts.open() as stream:
+			return yaml.safe_load(stream)
+
+	@classmethod
+	def load_accounts_json(cls, root):
+		"backward-compatible JSON-based account definition"
+		accounts = root / 'accounts.json'
+		with accounts.open() as stream:
+			warnings.warn("JSON account definition is deprecated",
+				DeprecationWarning)
+			return json.load(stream)
+
 
 class ListInstitutions(Command):
 	@classmethod
