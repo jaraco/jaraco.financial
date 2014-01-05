@@ -49,23 +49,17 @@ each with `institution` and `account` attributes. It should also have a
 OFX type. The institution must match exactly an institution as defined below.
 Here is an example accounts.yaml::
 
-    [
-        {
-            "institution": "Bank of America",
-            "account": "12345679",
-            "type": "savings"
-        },
-        {
-            "institution": "Wells Fargo",
-            "account": "872634126",
-            "type": "moneymrkt"
-        },
-        {
-            "institution": "Chase (credit card)",
-            "account": "4000111122223333",
-            "username": "myusername"
-        }
-    ]
+    - institution: Bank of America
+      account: "12345679"
+      type: savings
+
+    - institution: Wells Fargo
+      account: "872634126"
+      type: moneymrkt
+
+    - institution: Chase (credit card)
+      account: "4000111122223333"
+      username: myusername
 
 The `username` attribute must be included if the username of the local user
 (running the ofx command) differs from the account name on the account.
