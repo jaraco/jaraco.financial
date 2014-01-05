@@ -306,7 +306,8 @@ class OFXClient(object):
 		handle_response(resp)
 
 		content_type = resp.headers['Content-type']
-		if content_type != 'application/x-ofx':
+		expected_types = 'application/x-ofx', 'application/qfx'
+		if content_type not in expected_types:
 			log.warning(lf('Unexpected content type {content_type}'))
 
 		with open(name, "wb") as outfile:
