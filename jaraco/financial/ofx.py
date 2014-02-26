@@ -324,6 +324,9 @@ class Account(dict, dictlib.ItemsAsAttributes):
 	def __str__(self):
 		return '{institution} ({account})'.format(**self)
 
+	def matches(self, query):
+		return query.lower() in self.institution.lower()
+
 
 class DateAction(argparse.Action):
 	def __call__(self, parser, namespace, values, option_string=None):
@@ -398,7 +401,8 @@ class Base:
 class Accounts(Base):
 	@classmethod
 	def load_accounts(cls):
-		return cls.load_accounts_yaml() or cls.load_accounts_json()
+		docs = cls.load_accounts_yaml() or cls.load_accounts_json()
+		return list(map(Account, docs))
 
 	@classmethod
 	def load_accounts_yaml(cls):
@@ -423,10 +427,17 @@ class Accounts(Base):
 	@classmethod
 	def best_account(cls, input):
 		return next(
-			Account(account)
+			account
 			for account in cls.load_accounts()
-			if input in account['institution']
+			if input in account.institution
 		)
+
+	@classmethod
+	def matching_accounts(cls, query):
+		return [
+			account for account in cls.load_accounts()
+			if account.matches(query)
+		]
 
 
 class DownloadAll(Accounts, Command):
@@ -442,19 +453,15 @@ class DownloadAll(Accounts, Command):
 				"Money (implies validate).")
 		parser.add_argument('-k', '--like', help="Only download the accounts "
 			"whose names are like the supplied string.",
-			default='')
+			default=cls.load_accounts(), type=cls.matching_accounts,
+			dest='accounts')
 
 	@classmethod
 	def run(cls, args):
-		accounts = cls.load_accounts()
-		matching_accounts = [
-			account for account in accounts
-			if args.like.lower() in account['institution'].lower()
-		]
 		print('Matching {}/{} accounts'.format(
-			len(matching_accounts),
-			len(accounts)))
-		for account in matching_accounts:
+			len(args.accounts),
+			len(cls.load_accounts())))
+		for account in args.accounts:
 			log.info('Downloading %(institution)s (%(account)s)' % account)
 			username = account.get('username', getpass.getuser())
 			site = account['institution']
