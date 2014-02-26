@@ -18,6 +18,7 @@ import dateutil.parser
 import keyring
 import pkg_resources
 import ofxparse
+from jaraco.util import dictlib
 import jaraco.util.cmdline as cmdline
 from jaraco.util.string import local_format as lf
 import jaraco.util.logging
@@ -314,6 +315,16 @@ class OFXClient(object):
 		with open(name, "wb") as outfile:
 			outfile.write(resp.content)
 
+
+class Account(dict, dictlib.ItemsAsAttributes):
+	@property
+	def username(self):
+		return self.get('username', getpass.getuser())
+
+	def __str__(self):
+		return '{institution} ({account})'.format(**self)
+
+
 class DateAction(argparse.Action):
 	def __call__(self, parser, namespace, values, option_string=None):
 		value = values
@@ -409,6 +420,14 @@ class Accounts(Base):
 				DeprecationWarning)
 			return json.load(stream)
 
+	@classmethod
+	def best_account(cls, input):
+		return next(
+			Account(account)
+			for account in cls.load_accounts()
+			if input in account['institution']
+		)
+
 
 class DownloadAll(Accounts, Command):
 	@classmethod
@@ -462,6 +481,21 @@ class ListInstitutions(Command):
 	@classmethod
 	def run(cls, args):
 		list(map(print, sites))
+
+
+class UpdatePassword(Accounts, Command):
+	@classmethod
+	def add_arguments(cls, parser):
+		parser.add_argument('account', type=cls.best_account)
+
+	@classmethod
+	def run(cls, args):
+		prompt = "password for {account}> ".format(**vars(args))
+		new_password = getpass.getpass(prompt)
+		if not new_password:
+			return
+		keyring.set_password(args.account.institution, args.account.username,
+			new_password)
 
 
 def get_args():
