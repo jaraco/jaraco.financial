@@ -379,7 +379,38 @@ class Query(Command):
 			cls.download(args.site, args.account, dt_start, creds,
 				args.account_type)
 
-class DownloadAll(Command):
+
+class Base:
+	root = path.path('~/Documents/Financial').expanduser()
+
+
+class Accounts(Base):
+	@classmethod
+	def load_accounts(cls):
+		return cls.load_accounts_yaml() or cls.load_accounts_json()
+
+	@classmethod
+	def load_accounts_yaml(cls):
+		"""
+		Preferred mechanism for defining accounts.
+		"""
+		accounts = cls.root / 'accounts.yaml'
+		if not accounts.exists() or 'yaml' not in globals():
+			return
+		with accounts.open() as stream:
+			return yaml.safe_load(stream)
+
+	@classmethod
+	def load_accounts_json(cls):
+		"backward-compatible JSON-based account definition"
+		accounts = cls.root / 'accounts.json'
+		with accounts.open() as stream:
+			warnings.warn("JSON account definition is deprecated",
+				DeprecationWarning)
+			return json.load(stream)
+
+
+class DownloadAll(Accounts, Command):
 	@classmethod
 	def add_arguments(cls, parser):
 		default_start = datetime.datetime.now() - datetime.timedelta(days=31)
@@ -396,8 +427,7 @@ class DownloadAll(Command):
 
 	@classmethod
 	def run(cls, args):
-		root = path.path('~/Documents/Financial').expanduser()
-		accounts = cls.load_accounts_yaml(root) or cls.load_accounts_json(root)
+		accounts = cls.load_accounts()
 		matching_accounts = [
 			account for account in accounts
 			if args.like.lower() in account['institution'].lower()
@@ -427,31 +457,12 @@ class DownloadAll(Command):
 			doc = parser.parse(reader)
 		assert doc.account.statement
 
-	@classmethod
-	def load_accounts_yaml(cls, root):
-		"""
-		Preferred mechanism for defining accounts.
-		"""
-		accounts = root / 'accounts.yaml'
-		if not accounts.exists() or 'yaml' not in globals():
-			return
-		with accounts.open() as stream:
-			return yaml.safe_load(stream)
-
-	@classmethod
-	def load_accounts_json(cls, root):
-		"backward-compatible JSON-based account definition"
-		accounts = root / 'accounts.json'
-		with accounts.open() as stream:
-			warnings.warn("JSON account definition is deprecated",
-				DeprecationWarning)
-			return json.load(stream)
-
 
 class ListInstitutions(Command):
 	@classmethod
 	def run(cls, args):
 		list(map(print, sites))
+
 
 def get_args():
 	"""
