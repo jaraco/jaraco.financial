@@ -13,6 +13,8 @@ import datetime
 import itertools
 import argparse
 
+import six
+
 import jaraco.util.logging
 from jaraco.util import ui
 from jaraco.util import cmdline
@@ -116,8 +118,8 @@ class Agent(object):
 
 	def merchant_lines(self):
 		for merchant in self.accounts:
-			yield unicode(merchant)
-			for line in indent(map(unicode, self.accounts[merchant])):
+			yield six.text_type(merchant)
+			for line in indent(map(six.text_type, self.accounts[merchant])):
 				yield line
 
 	@classmethod
@@ -224,7 +226,7 @@ class AccountTransaction(object):
 	def __eq__(self, other):
 		return self.date == other.date and self.amount == other.amount
 
-class Date(unicode):
+class Date(six.text_type):
 	@classmethod
 	def from_key(cls, key):
 		if not re.match('\d+/\d+', key):
@@ -392,7 +394,7 @@ class Portfolio(dict):
 				amount = parse_amount(residual.amount)
 				date = residual.date.as_object()
 				designation = ledger.SimpleDesignation(
-					descriptor = "Residuals Earned : " + unicode(merchant),
+					descriptor = "Residuals Earned : " + six.text_type(merchant),
 					amount = amount,
 					)
 				txn = ledger.Transaction(date=date, payee='TransLink',
@@ -460,7 +462,7 @@ class Portfolio(dict):
 			return
 
 		# first add the $400 advance it's not already present
-		advance_descriptor = "Residual Advance : " + unicode(merchant)
+		advance_descriptor = "Residual Advance : " + six.text_type(merchant)
 		add_advance = is_empty(
 			agent_lgr.query(descriptor=advance_descriptor, amount=400)
 		)
