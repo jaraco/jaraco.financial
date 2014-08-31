@@ -1,5 +1,4 @@
 import re
-import sys
 import time
 
 def get_locale_time(date):
