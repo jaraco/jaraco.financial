@@ -85,6 +85,16 @@ To check that your institutions are being loaded correctly, use the
 Changes
 -------
 
+1.8
+~~~
+
+* Improved Python 3 support in more modules.
+
+1.7
+~~~
+
+* Added support for updating the password in the keyring.
+
 1.6
 ~~~
 
