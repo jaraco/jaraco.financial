@@ -1,5 +1,8 @@
 import re
 import time
+import textwrap
+
+from jaraco.util.dictlib import DictAdapter
 
 def get_locale_time(date):
 	# consider instead GetLocaleInfo
@@ -32,9 +35,6 @@ def fix_dates_cmd():
 def DALS(str):
 	"dedent and left strip"
 	return textwrap.dedent(str).lstrip()
-
-import textwrap
-from jaraco.util.dictlib import DictAdapter
 
 class Transaction(object):
 	fmt = DALS("""
