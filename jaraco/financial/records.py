@@ -1,7 +1,8 @@
 import os
 import subprocess
 import smtplib
-import email
+import email.mime.multipart
+import email.mime.text
 import getpass
 
 def email_message(body_text, subject=None):
@@ -12,8 +13,8 @@ def email_message(body_text, subject=None):
 	SMTP_FROM = 'jaraco@jaraco.com'
 	SMTP_TO = 'jaraco@jaraco.com.readnotify.com'
 
-	msg = email.MIMEMultipart.MIMEMultipart()
-	body = email.MIMEText.MIMEText(body_text)
+	msg = email.mime.multipart.MIMEMultipart()
+	body = email.mime.text.MIMEText(body_text)
 	msg.attach(body)
 	msg.add_header('From', SMTP_FROM)
 	msg.add_header('To', SMTP_TO)
@@ -36,7 +37,7 @@ def hash_files(root):
 	output, error = proc.communicate()
 	if os.path.isfile('fciv.err'):
 		os.remove('fciv.err')
-	return output
+	return output.decode('utf-8')
 
 def send_hashes():
 	"""
