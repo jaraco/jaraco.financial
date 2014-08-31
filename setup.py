@@ -5,6 +5,7 @@ Financial tools
 Copyright (c) 2010-2011 Jason R. Coombs
 """
 
+import io
 import sys
 
 import setuptools
@@ -15,8 +16,10 @@ argparse_req = ['argparse'] if sys.version_info < (2, 7) else []
 dateutil_ver = '<2.0dev' if sys.version_info < (3,) else '>=2.0'
 dateutil_req = ['python-dateutil' + dateutil_ver]
 
-with open('README') as ldf:
-	long_description = ldf.read()
+with io.open('README.txt', encoding='utf-8') as readme:
+	long_description = readme.read()
+with io.open('CHANGES.txt', encoding='utf-8') as changes:
+	long_description += '\n\n' + changes.read()
 
 setup_params = dict(
 	name = name,
