@@ -316,7 +316,7 @@ class Portfolio(dict):
 	def add_obligations(self):
 		self._print_obligations()
 		while True:
-			if raw_input('Add new obligation? ') != 'y':
+			if six.input('Add new obligation? ') != 'y':
 				break
 			agent_menu = ui.Menu(list(self))
 			agent = agent_menu.get_choice('which agent? ')
@@ -325,7 +325,7 @@ class Portfolio(dict):
 			other_agents = set(self) - set([agent])
 			agent_menu = ui.Menu(list(other_agents))
 			obl_agent = agent_menu.get_choice('pays to whom? ')
-			amount = raw_input('what percentage? ')
+			amount = six.input('what percentage? ')
 			amount = int(amount)/100
 			agent.obligations.add(merchant=merchant, agent=obl_agent,
 				share=amount)
@@ -348,16 +348,16 @@ class Portfolio(dict):
 	def add_liabilities(self):
 		self._print_liabilities()
 		while True:
-			if raw_input('Add liabilities? ') != 'y':
+			if six.input('Add liabilities? ') != 'y':
 				break
 			agent_menu = ui.Menu(list(self))
 			agent = agent_menu.get_choice('which agent? ')
-			amount = raw_input('amount: ')
-			descriptor = raw_input('category: ')
-			payee = raw_input('payee: ')
-			start_date = raw_input('start date (blank for none)? ')
-			end_date = raw_input('end date (blank for none)? ')
-			limit = raw_input('limit (blank for none)? ')
+			amount = six.input('amount: ')
+			descriptor = six.input('category: ')
+			payee = six.input('payee: ')
+			start_date = six.input('start date (blank for none)? ')
+			end_date = six.input('end date (blank for none)? ')
+			limit = six.input('limit (blank for none)? ')
 			designation = ledger.SimpleDesignation(
 				amount=parse_amount(amount),
 				descriptor=descriptor)
