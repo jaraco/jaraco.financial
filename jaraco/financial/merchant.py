@@ -413,22 +413,26 @@ class Portfolio(dict):
 		"""
 
 		"""
-		dates = sorted(set(txn.date
-			for ledger in self.itervalues()
-			for txn in ledger
-			if txn.date.day == 1
-		))
+		dates = sorted(
+			set(
+				txn.date
+				for ledger in self.itervalues()
+				for txn in ledger
+				if txn.date.day == 1
+			))
 		for date in dates:
 			for agent, agent_lgr in self.iteritems():
 				for liability in agent.liabilities:
 					liability.add(agent_lgr, date)
 
 	def pay_balances(self):
-		dates = sorted(set(txn.date
-			for ledger in self.itervalues()
-			for txn in ledger
-			if txn.date.day == 1
-		))
+		dates = sorted(
+			set(
+				txn.date
+				for ledger in self.itervalues()
+				for txn in ledger
+				if txn.date.day == 1
+			))
 		for date in dates:
 			for agent_lgr in self.itervalues():
 				self.pay_balance(agent_lgr, date)
