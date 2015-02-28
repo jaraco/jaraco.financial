@@ -70,6 +70,7 @@ setup_params = dict(
 	],
 	tests_require=[
 		'pytest',
+		'xlsxcessive',
 	],
 	setup_requires=[
 		'hgtools>=5',
