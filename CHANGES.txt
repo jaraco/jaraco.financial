@@ -1,6 +1,11 @@
 Changes
 -------
 
+1.9
+~~~
+
+* Removed dependency on ``jaraco.util``.
+
 1.8
 ~~~
 

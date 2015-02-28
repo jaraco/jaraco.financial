@@ -1,7 +1,7 @@
 import bisect
 import datetime
 
-import jaraco.util.itertools
+import jaraco.itertools
 
 class Transaction(object):
 	payee = None
@@ -24,7 +24,7 @@ class Transaction(object):
 		return sum(
 			item.amount
 			for item in
-				jaraco.util.itertools.always_iterable(self.designation)
+				jaraco.itertools.always_iterable(self.designation)
 			if descriptor is None or descriptor == item.descriptor
 		)
 	amount = property(get_amount)
@@ -84,7 +84,7 @@ class Ledger(list):
 
 	def query(self, descriptor=None, amount=None):
 		for txn in self:
-			dsgns = jaraco.util.itertools.always_iterable(txn.designation)
+			dsgns = jaraco.itertools.always_iterable(txn.designation)
 			for designation in dsgns:
 				if descriptor and designation.descriptor != descriptor:
 					continue

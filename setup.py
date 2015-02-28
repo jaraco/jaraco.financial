@@ -52,10 +52,14 @@ setup_params = dict(
 	},
 	install_requires=[
 		'keyring',
-		'jaraco.util>=6.3.1',
 		'path.py',
 		'ofxparse',
 		'requests',
+		'jaraco.itertools',
+		'jaraco.logging',
+		'jaraco.ui',
+		'jaraco.text',
+		'jaraco.collections',
 	] + argparse_req + dateutil_req,
 	extras_require = {
 	},

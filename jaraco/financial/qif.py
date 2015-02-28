@@ -2,7 +2,7 @@ import re
 import time
 import textwrap
 
-from jaraco.util.dictlib import DictAdapter
+from jaraco.collections import DictAdapter
 
 def get_locale_time(date):
 	# consider instead GetLocaleInfo

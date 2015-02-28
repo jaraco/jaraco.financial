@@ -15,12 +15,11 @@ import argparse
 
 import six
 
-import jaraco.util.logging
-from jaraco.util import ui
-from jaraco.util import cmdline
+import jaraco.logging
+from jaraco.ui import menu, cmdline
 from bs4 import BeautifulSoup
 import xlsxcessive.xlsx
-from jaraco.util.itertools import is_empty, always_iterable
+from jaraco.itertools import is_empty, always_iterable
 
 from . import ledger
 
@@ -318,12 +317,12 @@ class Portfolio(dict):
 		while True:
 			if six.input('Add new obligation? ') != 'y':
 				break
-			agent_menu = ui.Menu(list(self))
+			agent_menu = menu.Menu(list(self))
 			agent = agent_menu.get_choice('which agent? ')
-			merchant_menu = ui.Menu(list(agent.accounts))
+			merchant_menu = menu.Menu(list(agent.accounts))
 			merchant = merchant_menu.get_choice('which merchant? ')
 			other_agents = set(self) - set([agent])
-			agent_menu = ui.Menu(list(other_agents))
+			agent_menu = menu.Menu(list(other_agents))
 			obl_agent = agent_menu.get_choice('pays to whom? ')
 			amount = six.input('what percentage? ')
 			amount = int(amount)/100
@@ -499,7 +498,7 @@ class Portfolio(dict):
 	@classmethod
 	def handle_command_line(cls):
 		parser = argparse.ArgumentParser()
-		jaraco.util.logging.add_arguments(parser)
+		jaraco.logging.add_arguments(parser)
 		cmdline.Command.add_subparsers(parser)
 		args = parser.parse_args()
 		args.action.run(args)

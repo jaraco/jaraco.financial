@@ -18,11 +18,10 @@ import dateutil.parser
 import keyring
 import pkg_resources
 import ofxparse
-from jaraco.util import dictlib
-import jaraco.util.cmdline as cmdline
-from jaraco.util.string import local_format as lf
-import jaraco.util.logging
-import jaraco.util.meta
+import jaraco.collections
+from jaraco.ui import cmdline
+from jaraco.text import local_format as lf
+import jaraco.logging
 from requests.packages.urllib3.connectionpool import HTTPConnection
 
 try:
@@ -316,7 +315,7 @@ class OFXClient(object):
 			outfile.write(resp.content)
 
 
-class Account(dict, dictlib.ItemsAsAttributes):
+class Account(dict, jaraco.collections.ItemsAsAttributes):
 	@property
 	def username(self):
 		return self.get('username', getpass.getuser())
@@ -511,7 +510,7 @@ def get_args():
 	"""
 	usage = inspect.getdoc(handle_command_line)
 	parser = argparse.ArgumentParser(usage=usage)
-	jaraco.util.logging.add_arguments(parser)
+	jaraco.logging.add_arguments(parser)
 	Command.add_subparsers(parser)
 	return parser.parse_args()
 
@@ -525,7 +524,7 @@ def setup_requests_logging(level):
 
 def handle_command_line():
 	args = get_args()
-	jaraco.util.logging.setup(args, format="%(message)s")
+	jaraco.logging.setup(args, format="%(message)s")
 	setup_requests_logging(args.log_level)
 	load_sites()
 	args.action.run(args)
