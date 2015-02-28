@@ -21,6 +21,9 @@ with io.open('README.txt', encoding='utf-8') as readme:
 with io.open('CHANGES.txt', encoding='utf-8') as changes:
 	long_description += '\n\n' + changes.read()
 
+needs_pytest = {'pytest', 'test'}.intersection(sys.argv)
+pytest_runner = ['pytest_runner'] if needs_pytest else []
+
 setup_params = dict(
 	name = name,
 	use_vcs_version = True,
@@ -66,10 +69,11 @@ setup_params = dict(
 	dependency_links = [
 	],
 	tests_require=[
+		'pytest',
 	],
 	setup_requires=[
 		'hgtools>=5',
-	],
+	] + pytest_runner,
 )
 
 if __name__ == '__main__':
