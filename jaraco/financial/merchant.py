@@ -251,11 +251,11 @@ def parse_table(node):
 
 def parse_amount(amount_str):
 	"""
-	>>> parse_amount('$20.0')
+	>>> print(parse_amount('$20.0'))
 	20.0
-	>>> parse_amount('(30)')
+	>>> print(parse_amount('(30)'))
 	-30
-	>>> parse_amount('($30.1)')
+	>>> print(parse_amount('($30.1)'))
 	-30.1
 	"""
 	amount_str = amount_str.replace('$', '').replace(',', '')
