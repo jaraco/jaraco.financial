@@ -23,7 +23,7 @@ with io.open('CHANGES.txt', encoding='utf-8') as changes:
 
 setup_params = dict(
 	name = name,
-	use_hg_version = True,
+	use_vcs_version = True,
 	description = 'Financial tools by jaraco',
 	long_description = long_description,
 	author = 'Jason R. Coombs',
@@ -68,7 +68,7 @@ setup_params = dict(
 	tests_require=[
 	],
 	setup_requires=[
-		'hgtools>=0.4',
+		'hgtools>=5',
 	],
 )
 
