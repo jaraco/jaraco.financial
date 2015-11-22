@@ -35,6 +35,20 @@ log = logging.getLogger(__name__)
 
 sites = dict()
 
+
+def disable_future_warning():
+	"""
+	Suppress warning as reported at
+	https://github.com/jseutter/ofxparse/issues/87
+	"""
+	warnings.filterwarnings(
+		action="ignore",
+		category=FutureWarning,
+		message="non-empty pattern match",
+	)
+disable_future_warning()
+
+
 def load_sites():
 	_load_sites_from_entry_points()
 	_load_sites_from_file()
