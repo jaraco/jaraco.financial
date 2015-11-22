@@ -1,5 +1,5 @@
 Welcome to jaraco.financial documentation!
-========================================
+==========================================
 
 .. toctree::
    :maxdepth: 1
