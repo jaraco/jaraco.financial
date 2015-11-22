@@ -13,8 +13,6 @@ import setuptools
 name = 'jaraco.financial'
 
 argparse_req = ['argparse'] if sys.version_info < (2, 7) else []
-dateutil_ver = '<2.0dev' if sys.version_info < (3,) else '>=2.0'
-dateutil_req = ['python-dateutil' + dateutil_ver]
 
 with io.open('README.txt', encoding='utf-8') as readme:
 	long_description = readme.read()
@@ -63,7 +61,8 @@ setup_params = dict(
 		'jaraco.ui',
 		'jaraco.text',
 		'jaraco.collections',
-	] + argparse_req + dateutil_req,
+		'python-dateutil>=2.0',
+	] + argparse_req,
 	extras_require = {
 	},
 	dependency_links = [
