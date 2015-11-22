@@ -2,7 +2,7 @@
 
 """
 Financial tools
-Copyright (c) 2010-2011 Jason R. Coombs
+Copyright (c) 2010-2015 Jason R. Coombs
 """
 
 import io
@@ -11,8 +11,6 @@ import sys
 import setuptools
 
 name = 'jaraco.financial'
-
-argparse_req = ['argparse'] if sys.version_info < (2, 7) else []
 
 with io.open('README.txt', encoding='utf-8') as readme:
 	long_description = readme.read()
@@ -36,7 +34,6 @@ setup_params = dict(
 	classifiers = [
 		"Development Status :: 4 - Beta",
 		"Intended Audience :: Developers",
-		"Programming Language :: Python :: 2.6",
 		"Programming Language :: Python :: 2.7",
 		"Programming Language :: Python :: 3",
 	],
@@ -62,7 +59,7 @@ setup_params = dict(
 		'jaraco.text',
 		'jaraco.collections',
 		'python-dateutil>=2.0',
-	] + argparse_req,
+	],
 	extras_require = {
 	},
 	dependency_links = [
