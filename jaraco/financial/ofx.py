@@ -44,7 +44,7 @@ def disable_future_warning():
 	warnings.filterwarnings(
 		action="ignore",
 		category=FutureWarning,
-		message="non-empty pattern match",
+		message="split\(\) requires a non-empty pattern match",
 	)
 disable_future_warning()
 
