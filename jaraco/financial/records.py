@@ -1,9 +1,12 @@
-import os
-import subprocess
 import smtplib
 import email.mime.multipart
 import email.mime.text
 import getpass
+import io
+import codecs
+
+from path import Path
+
 
 def email_message(body_text, subject=None):
 	SMTP_SERVER = 'pod51011.outlook.com'
@@ -31,13 +34,23 @@ def email_message(body_text, subject=None):
 	mailer.sendmail(SMTP_FROM, [SMTP_TO], msg.as_string())
 	mailer.close()
 
+def _as_hex(bytes):
+	"""
+	Replacement for ``bytes.encode('hex')`` but on Python 3
+	"""
+	return codecs.encode(bytes, 'hex_codec').decode('ascii')
+
 def hash_files(root):
-	proc = subprocess.Popen(['fciv', '-add', root, '-bp', root, '-r'],
-		stdout=subprocess.PIPE)
-	output, error = proc.communicate()
-	if os.path.isfile('fciv.err'):
-		os.remove('fciv.err')
-	return output.decode('utf-8')
+	"""
+	>>> res = hash_files(Path(__file__).dirname())
+	>>> print(res)
+	d41d8cd98f00b204e9800998ecf8427e __init__.py
+	...
+	"""
+	output = io.StringIO()
+	for path in root.walkfiles():
+		print(_as_hex(path.read_md5()), path.relpath(root), file=output)
+	return output.getvalue()
 
 def send_hashes():
 	"""
@@ -46,6 +59,6 @@ def send_hashes():
 	evidence of existence of the versions of the files
 	available today.
 	"""
-	root = os.path.expanduser('~/Documents')
+	root = Path('~/Documents').expanduser()
 	output = hash_files(root)
 	email_message(output, "Document Hashes")
