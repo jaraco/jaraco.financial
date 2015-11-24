@@ -6,6 +6,7 @@ import io
 import codecs
 
 from path import Path
+from jaraco.ui import progress
 
 
 def email_message(body_text, subject=None):
@@ -48,7 +49,11 @@ def hash_files(root):
 	...
 	"""
 	output = io.StringIO()
-	for path in root.walkfiles():
+	print("Discovering documents")
+	files = list(root.walkfiles())
+	print("Hashing documents")
+	bar = progress.TargetProgressBar(len(files))
+	for path in bar.iterate(files):
 		print(_as_hex(path.read_md5()), path.relpath(root), file=output)
 	return output.getvalue()
 
@@ -61,4 +66,5 @@ def send_hashes():
 	"""
 	root = Path('~/Documents').expanduser()
 	output = hash_files(root)
+	print("Sending hashes ({length} bytes)".format(length=len(output)))
 	email_message(output, "Document Hashes")
