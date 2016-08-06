@@ -25,10 +25,6 @@ enabling mechanical downloads of OFX data from institutions that support OFX.
 `MIT-style permissive license
 <http://www.opensource.org/licenses/mit-license.php>`_.
 
-You can install it with ``easy_install jaraco.financial``, or grab the code
-from the `mercurial repository
-<https://bitbucket.org/jaraco/jaraco.financial>`_.
-
 Getting Started
 ---------------
 
