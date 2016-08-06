@@ -1,6 +1,16 @@
 Changes
 -------
 
+1.11
+~~~~
+
+Configured project for automatic releases and moved hosting to Github.
+
+1.10
+~~~~
+
+* Dropped support for Python 2.6.
+
 1.9
 ~~~
 
