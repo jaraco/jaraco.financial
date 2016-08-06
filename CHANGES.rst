@@ -54,7 +54,7 @@
 * `ofx` script now implements different commands. Where one called "ofx"
   before, now call "ofx query".
 * Added new command "ofx download-all", which loads the accounts from a JSON
-  file (=/Documents/Financial/accounts.json) and downloads transactions for
+  file (~/Documents/Financial/accounts.json) and downloads transactions for
   the accounts listed in that file.
 * Added command "record-document-hashes" for e-mailing record of the
   hashes of each document.
