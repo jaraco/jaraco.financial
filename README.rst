@@ -1,6 +1,3 @@
-jaraco.financial
-================
-
 .. image:: https://img.shields.io/pypi/v/jaraco.financial.svg
    :target: https://pypi.io/project/jaraco.financial
 
@@ -11,7 +8,9 @@ jaraco.financial
 .. image:: https://img.shields.io/travis/jaraco/jaraco.financial/master.svg
    :target: http://travis-ci.org/jaraco/jaraco.financial
 
-.. contents::
+License is indicated in the project metadata (typically one or more
+of the Trove classifiers). For more details, see `this explanation
+<https://github.com/jaraco/skeleton/issues/1>`_.
 
 Overview
 --------
