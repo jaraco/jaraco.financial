@@ -1,3 +1,8 @@
+1.12
+====
+
+* Refreshed project skeleton, now running tests under tox.
+
 1.11
 ====
 
