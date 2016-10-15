@@ -19,7 +19,7 @@ deploy:
   provider: pypi
   server: https://upload.pypi.org/legacy/
   on:
-    tags: true
+    #tags: true
     all_branches: true
     python: 3.5
   user: jaraco
