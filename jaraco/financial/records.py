@@ -51,10 +51,8 @@ def hash_files(root):
 	Discovering documents
 	Hashing documents
 	...
-	>>> print('x' + res)
-	x...
-	d41d8cd98f00b204e9800998ecf8427e __init__.py
-	...
+	>>> "d41d8cd98f00b204e9800998ecf8427e __init__.py" in res
+	True
 	"""
 	output = io.StringIO()
 	print("Discovering documents")
