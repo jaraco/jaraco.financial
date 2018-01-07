@@ -22,6 +22,7 @@ import jaraco.collections
 from jaraco.ui import cmdline
 from jaraco.text import local_format as lf
 import jaraco.logging
+from jaraco.functools import call_aside
 from requests.packages.urllib3.connectionpool import HTTPConnection
 
 try:
@@ -36,6 +37,7 @@ log = logging.getLogger(__name__)
 sites = dict()
 
 
+@call_aside
 def disable_future_warning():
 	"""
 	Suppress warning as reported at
@@ -46,7 +48,6 @@ def disable_future_warning():
 		category=FutureWarning,
 		message="split\(\) requires a non-empty pattern match",
 	)
-disable_future_warning()
 
 
 def load_sites():

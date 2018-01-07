@@ -43,6 +43,7 @@ params = dict(
 		'jaraco.text',
 		'jaraco.collections',
 		'python-dateutil>=2.0',
+		'jaraco.functools',
 	],
 	extras_require={
 		'testing': [
