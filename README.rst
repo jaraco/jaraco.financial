@@ -3,26 +3,16 @@
 
 .. image:: https://img.shields.io/pypi/pyversions/jaraco.financial.svg
 
-.. image:: https://img.shields.io/pypi/dm/jaraco.financial.svg
-
 .. image:: https://img.shields.io/travis/jaraco/jaraco.financial/master.svg
    :target: http://travis-ci.org/jaraco/jaraco.financial
 
-License is indicated in the project metadata (typically one or more
-of the Trove classifiers). For more details, see `this explanation
-<https://github.com/jaraco/skeleton/issues/1>`_.
-
-Overview
---------
+.. image:: https://readthedocs.org/projects/jaracofinancial/badge/?version=latest
+   :target: https://jaracofinancial.readthedocs.io/en/latest/?badge=latest
 
 ``jaraco.financial`` implements tools for financial management, particularly
 around Open Financial Exchange and Microsoft Money. These scripts help
 facilitate the continued use of Money using the free, sunset release, by
 enabling mechanical downloads of OFX data from institutions that support OFX.
-
-``jaraco.financial`` is written by Jason R. Coombs.  It is licensed under an
-`MIT-style permissive license
-<http://www.opensource.org/licenses/mit-license.php>`_.
 
 Getting Started
 ---------------
