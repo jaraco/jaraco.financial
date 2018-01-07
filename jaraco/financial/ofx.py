@@ -83,7 +83,7 @@ def _load_sites_from_entry_points():
 def _load_sites_from_file():
 	if 'yaml' not in globals():
 		return
-	sites_file = path.path('~/Documents/Financial/institutions.yaml')
+	sites_file = path.Path('~/Documents/Financial/institutions.yaml')
 	sites_file = sites_file.expanduser()
 	if not sites_file.exists():
 		return
@@ -364,7 +364,7 @@ class Command(cmdline.Command):
 		filename = '{site} {account} {dtnow}.ofx'.format(
 			dtnow = datetime.datetime.now().strftime('%Y-%m-%d'),
 			**vars())
-		filename = path.path(filename)
+		filename = path.Path(filename)
 		client.doQuery(query, filename)
 		return filename
 
@@ -408,7 +408,7 @@ class Query(Command):
 
 
 class Base:
-	root = path.path('~/Documents/Financial').expanduser()
+	root = path.Path('~/Documents/Financial').expanduser()
 
 
 class Accounts(Base):

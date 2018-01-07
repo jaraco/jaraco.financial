@@ -8,13 +8,13 @@ import sys
 import struct
 
 import six
-from path import path
+from path import Path
 
 def find_programfiles_dir(child):
 	"""
 	Find a file in Program Files or Program Files (x86)
 	"""
-	pgfiles = path(r'C:\Program Files'), path(r'C:\Program Files (x86)')
+	pgfiles = Path(r'C:\Program Files'), Path(r'C:\Program Files (x86)')
 	candidates = (root / child for root in pgfiles)
 	return next(candidate for candidate in candidates if candidate.isdir())
 
@@ -50,7 +50,7 @@ def clean_temp():
 	removes the files, and Money will clean the registry on the next start.
 	"""
 	to_remove = [
-		f for f in path(os.environ['TEMP']).files()
+		f for f in Path(os.environ['TEMP']).files()
 		if re.match(r'~of[0-9A-Z]{4}\.tmp', f.basename())
 	]
 	for f in to_remove:
