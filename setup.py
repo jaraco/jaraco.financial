@@ -56,6 +56,9 @@ params = dict(
 			'jaraco.packaging>=3.2',
 			'rst.linker>=1.9',
 		],
+		':python_version != "2.7"': [
+			'autocommand',
+		],
 	},
 	setup_requires=[
 		'setuptools_scm>=1.15.0',

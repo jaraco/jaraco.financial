@@ -1,3 +1,10 @@
+1.13
+====
+
+* Added ``jaraco.financial.paychex`` command for building an OFX
+  file from PayChex based on a truncated OFX download and full
+  CSV download (Python 3.6 only).
+
 1.12
 ====
 
