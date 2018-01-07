@@ -54,6 +54,7 @@ def load_sites():
 	_load_sites_from_entry_points()
 	_load_sites_from_file()
 
+
 def _load_sites_from_entry_points():
 	"""
 	Locate all setuptools entry points by the name 'financial_institutions'
@@ -81,6 +82,7 @@ def _load_sites_from_entry_points():
 		except Exception:
 			log.exception("Error initializing institution %s." % ep)
 
+
 def _load_sites_from_file():
 	if 'yaml' not in globals():
 		return
@@ -92,8 +94,10 @@ def _load_sites_from_file():
 		new_sites = yaml.safe_load(stream)
 	sites.update(new_sites)
 
+
 def _field(tag, value):
 	return lf('<{tag}>{value}')
+
 
 def _tag(tag, *contents):
 	start_tag = lf('<{tag}>')
@@ -101,13 +105,17 @@ def _tag(tag, *contents):
 	lines = itertools.chain([start_tag], contents, [end_tag])
 	return '\r\n'.join(lines)
 
+
 def _date():
 	return datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
+
 
 def _genuuid():
 	return uuid.uuid4().hex
 
+
 AppInfo = collections.namedtuple('AppInfo', 'id version')
+
 
 def handle_response(resp):
 	"""
@@ -117,6 +125,7 @@ def handle_response(resp):
 		with open('err.txt', 'wb') as err_f:
 			err_f.write(resp.content)
 	resp.raise_for_status()
+
 
 def sign_on_message(config):
 	fidata = [_field("ORG", config["fiorg"])]
@@ -136,6 +145,7 @@ def sign_on_message(config):
 		),
 	)
 
+
 def get_version_id():
 	"""
 	OFX seems to like version ids that look like NNNN, so generate something
@@ -149,6 +159,7 @@ def get_version_id():
 	ver_id = '{:0>4s}'.format(ver_id)
 	assert len(ver_id) == 4
 	return ver_id
+
 
 class OFXClient(object):
 	"""
@@ -189,7 +200,8 @@ class OFXClient(object):
 
 	# this is from _ccreq below and reading page 176 of the latest OFX doc.
 	def _bareq(self, bankid, acctid, dtstart, accttype):
-		req = _tag("STMTRQ",
+		req = _tag(
+			"STMTRQ",
 			_tag(
 				"BANKACCTFROM",
 				_field("BANKID", bankid),
@@ -220,7 +232,7 @@ class OFXClient(object):
 	def _invstreq(self, brokerid, acctid, dtstart):
 		dtnow = _date()
 		req = _tag(
-				"INVSTMTRQ",
+			"INVSTMTRQ",
 			_tag(
 				"INVACCTFROM",
 				_field("BROKERID", brokerid),
@@ -242,7 +254,8 @@ class OFXClient(object):
 		return self._message("INVSTMT", "INVSTMT", req)
 
 	def _message(self, msgType, trnType, request):
-		return _tag(msgType + "MSGSRQV1",
+		return _tag(
+			msgType + "MSGSRQV1",
 			_tag(
 				trnType + "TRNRQ",
 				_field("TRNUID", _genuuid()),
@@ -348,6 +361,7 @@ class DateAction(argparse.Action):
 		value = dateutil.parser.parse(value)
 		setattr(namespace, self.dest, value)
 
+
 class Command(cmdline.Command):
 	@staticmethod
 	def download(site, account, dt_start, creds, account_type=None):
@@ -363,7 +377,7 @@ class Command(cmdline.Command):
 			bank_id = config["bankid"]
 			query = client.baQuery(bank_id, account, dt_start, account_type)
 		filename = '{site} {account} {dtnow}.ofx'.format(
-			dtnow = datetime.datetime.now().strftime('%Y-%m-%d'),
+			dtnow=datetime.datetime.now().strftime('%Y-%m-%d'),
 			**vars())
 		filename = path.Path(filename)
 		client.doQuery(query, filename)
@@ -387,10 +401,11 @@ class Query(Command):
 		parser.add_argument(
 			'-t', '--account-type',
 			help="Required if retrieving bank statement, should be CHECKING, "
-				"SAVINGS, ...",
+			"SAVINGS, ...",
 		)
 		default_start = datetime.datetime.now() - datetime.timedelta(days=31)
-		parser.add_argument('-d', '--start-date', default=default_start,
+		parser.add_argument(
+			'-d', '--start-date', default=default_start,
 			action=DateAction)
 
 	@classmethod
@@ -404,7 +419,8 @@ class Query(Command):
 			client.doQuery(query, args.site + "_acct.ofx")
 		else:
 			dt_start = args.start_date.strftime("%Y%m%d")
-			cls.download(args.site, args.account, dt_start, creds,
+			cls.download(
+				args.site, args.account, dt_start, creds,
 				args.account_type)
 
 
@@ -434,7 +450,8 @@ class Accounts(Base):
 		"backward-compatible JSON-based account definition"
 		accounts = cls.root / 'accounts.json'
 		with accounts.open() as stream:
-			warnings.warn("JSON account definition is deprecated",
+			warnings.warn(
+				"JSON account definition is deprecated",
 				DeprecationWarning)
 			return json.load(stream)
 
@@ -458,14 +475,19 @@ class DownloadAll(Accounts, Command):
 	@classmethod
 	def add_arguments(cls, parser):
 		default_start = datetime.datetime.now() - datetime.timedelta(days=31)
-		parser.add_argument('-d', '--start-date', default=default_start,
+		parser.add_argument(
+			'-d', '--start-date', default=default_start,
 			action=DateAction)
-		parser.add_argument('-v', '--validate', default=False,
+		parser.add_argument(
+			'-v', '--validate', default=False,
 			action="store_true")
-		parser.add_argument('-l', '--launch', default=False,
-			action="store_true", help="Launch the downloaded file in MS "
-				"Money (implies validate).")
-		parser.add_argument('-k', '--like', help="Only download the accounts "
+		parser.add_argument(
+			'-l', '--launch', default=False,
+			action="store_true",
+			help="Launch the downloaded file in MS "
+			"Money (implies validate).")
+		parser.add_argument(
+			'-k', '--like', help="Only download the accounts "
 			"whose names are like the supplied string.",
 			default=cls.load_accounts(), type=cls.matching_accounts,
 			dest='accounts')
@@ -482,7 +504,8 @@ class DownloadAll(Accounts, Command):
 			creds = username, cls._get_password(site, username)
 			acct_type = account.get('type', '').upper() or None
 			dt_start = args.start_date.strftime("%Y%m%d")
-			ofx = cls.download(site, account['account'], dt_start, creds,
+			ofx = cls.download(
+				site, account['account'], dt_start, creds,
 				acct_type)
 			if args.validate or args.launch:
 				cls.validate(ofx)
@@ -515,7 +538,8 @@ class UpdatePassword(Accounts, Command):
 		new_password = getpass.getpass(prompt)
 		if not new_password:
 			return
-		keyring.set_password(args.account.institution, args.account.username,
+		keyring.set_password(
+			args.account.institution, args.account.username,
 			new_password)
 
 
@@ -529,6 +553,7 @@ def get_args():
 	Command.add_subparsers(parser)
 	return parser.parse_args()
 
+
 def setup_requests_logging(level):
 	requests_log = logging.getLogger("requests.packages.urllib3")
 	requests_log.setLevel(level)
@@ -537,12 +562,14 @@ def setup_requests_logging(level):
 	# enable debugging at httplib level
 	HTTPConnection.debuglevel = level <= logging.DEBUG
 
+
 def handle_command_line():
 	args = get_args()
 	jaraco.logging.setup(args, format="%(message)s")
 	setup_requests_logging(args.log_level)
 	load_sites()
 	args.action.run(args)
+
 
 if __name__ == "__main__":
 	handle_command_line()

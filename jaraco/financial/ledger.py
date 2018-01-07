@@ -3,6 +3,7 @@ import datetime
 
 import jaraco.itertools
 
+
 class Transaction(object):
 	payee = None
 	date = None
@@ -13,7 +14,7 @@ class Transaction(object):
 
 	def __init__(self, **kwargs):
 		self.__dict__.update(kwargs)
-		if not 'date' in vars(self):
+		if 'date' not in vars(self):
 			self.date = datetime.datetime.utcnow()
 
 	def get_amount(self, descriptor=None):
@@ -24,7 +25,7 @@ class Transaction(object):
 		return sum(
 			item.amount
 			for item in
-				jaraco.itertools.always_iterable(self.designation)
+			jaraco.itertools.always_iterable(self.designation)
 			if descriptor is None or descriptor == item.descriptor
 		)
 	amount = property(get_amount)
@@ -43,8 +44,10 @@ class Transaction(object):
 	def __hash__(self):
 		return hash(self._identity())
 
+
 class SplitDesignation(list):
 	"A list of SimpleDesignations"
+
 
 class SimpleDesignation(object):
 	def __init__(self, descriptor, amount, memo=None):
@@ -62,8 +65,10 @@ class SimpleDesignation(object):
 		return self * -1
 
 	def __mul__(self, proportion):
-		return SimpleDesignation(descriptor=self.descriptor,
-			amount=proportion*self.amount, memo=self.memo)
+		return SimpleDesignation(
+			descriptor=self.descriptor,
+			amount=proportion * self.amount, memo=self.memo)
+
 
 class Ledger(list):
 	"""
@@ -94,10 +99,12 @@ class Ledger(list):
 				# don't yield any transaction more than once
 				break
 
+
 class Named(object):
 	def __init__(self, name, *args, **kwargs):
 		super(Named, self).__init__(*args, **kwargs)
 		self.name = name
+
 
 class Account(Named, Ledger):
 	"""

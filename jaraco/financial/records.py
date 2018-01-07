@@ -37,11 +37,13 @@ def email_message(body_text, subject=None):
 	mailer.sendmail(SMTP_FROM, [SMTP_TO], msg.as_string())
 	mailer.close()
 
+
 def _as_hex(bytes):
 	"""
 	Replacement for ``bytes.encode('hex')`` but on Python 3
 	"""
 	return codecs.encode(bytes, 'hex_codec').decode('ascii')
+
 
 def hash_files(root):
 	"""
@@ -62,6 +64,7 @@ def hash_files(root):
 	for path in bar.iterate(files):
 		print(_as_hex(path.read_md5()), path.relpath(root), file=output)
 	return output.getvalue()
+
 
 def send_hashes():
 	"""

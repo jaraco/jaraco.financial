@@ -10,6 +10,7 @@ import struct
 import six
 from path import Path
 
+
 def find_programfiles_dir(child):
 	"""
 	Find a file in Program Files or Program Files (x86)
@@ -18,22 +19,27 @@ def find_programfiles_dir(child):
 	candidates = (root / child for root in pgfiles)
 	return next(candidate for candidate in candidates if candidate.isdir())
 
+
 def find_money():
 	root = find_programfiles_dir('Microsoft Money Plus')
 	return root / 'MnyCoreFiles' / 'mnyimprt.exe'
+
 
 def get_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('filename')
 	return parser.parse_args()
 
+
 def launch_cmd():
 	"Command-line script to launch a file in MS Money"
 	args = get_args()
 	launch(args.filename)
 
+
 def make_unsigned(code):
 	return struct.unpack('L', struct.pack('l', code))[0]
+
 
 def launch(filename):
 	money = find_money()
@@ -42,6 +48,7 @@ def launch(filename):
 	#  as a separate parameter.
 	mnyimprt_cmd = [money] + filename.split(' ')
 	subprocess.check_call(mnyimprt_cmd)
+
 
 def clean_temp():
 	"""
@@ -56,6 +63,7 @@ def clean_temp():
 	for f in to_remove:
 		print('removing', f)
 		f.remove()
+
 
 def patch_binary_for_payee_name_crash():
 	"""
@@ -81,11 +89,11 @@ def patch_binary_for_payee_name_crash():
 	# open the file for read and update (binary)
 	with dll.open('r+b') as file:
 		file.seek(0x3FACE8)
-		data = file.read(0xF6-0xE8+1)
-		assert six.indexbytes(data, 0xE8-0xE8) == 0x85
-		assert six.indexbytes(data, 0xED-0xE8) == 0x50
-		assert six.indexbytes(data, 0xF0-0xE8) == 0xFF
-		assert six.indexbytes(data, 0xF6-0xE8) == 0xE8
+		data = file.read(0xF6 - 0xE8 + 1)
+		assert six.indexbytes(data, 0xE8 - 0xE8) == 0x85
+		assert six.indexbytes(data, 0xED - 0xE8) == 0x50
+		assert six.indexbytes(data, 0xF0 - 0xE8) == 0xFF
+		assert six.indexbytes(data, 0xF6 - 0xE8) == 0xE8
 		file.seek(0x3FACE8)
 		file.write(six.int2byte(0x8D))
 		file.seek(0x3FACED)

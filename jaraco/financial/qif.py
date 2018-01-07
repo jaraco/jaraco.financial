@@ -4,6 +4,7 @@ import textwrap
 
 from jaraco.collections import DictAdapter
 
+
 def get_locale_time(date):
 	# consider instead GetLocaleInfo
 	import win32api
@@ -14,7 +15,8 @@ def get_locale_time(date):
 
 def replace_val(matcher):
 	date = time.strptime(matcher.group(0), 'D%m/%d/%Y')
-	return 'D'+time.strftime('%d-%m-%Y', date)
+	return 'D' + time.strftime('%d-%m-%Y', date)
+
 
 def inline_sub(filename):
 	dat = open(filename).read()
@@ -24,17 +26,21 @@ def inline_sub(filename):
 	res = pattern.sub(replace_val, dat)
 	open(filename, 'w').write(res)
 
+
 def fix_dates_cmd():
 	from optparse import OptionParser
 	parser = OptionParser(usage="%prog filename")
 	options, args = parser.parse_args()
 	filename = args.pop()
-	if args: parser.error("Unexpected parameter")
+	if args:
+		parser.error("Unexpected parameter")
 	inline_sub(filename)
+
 
 def DALS(str):
 	"dedent and left strip"
 	return textwrap.dedent(str).lstrip()
+
 
 class Transaction(object):
 	fmt = DALS("""
@@ -45,6 +51,7 @@ class Transaction(object):
 
 	def _as_mapping(self):
 		return DictAdapter(self)
+
 
 class InvestmentTransaction(Transaction):
 	fmt = Transaction.fmt + DALS("""
