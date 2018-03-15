@@ -25,6 +25,7 @@ class Lots(collections.defaultdict):
 	asset_field = 'Asset'
 	amount_field = 'USD Amount Transacted (Inclusive of Coinbase Fees)'
 	buy_pattern = '(Buy|Receive)'
+	basis_field = 'Basis'
 
 	def __init__(self, transactions):
 		self.transactions = transactions
@@ -44,24 +45,26 @@ class Lots(collections.defaultdict):
 		yield from self.allocate_lots(transaction)
 
 	def allocate_lots(self, sale):
-		qty = decimal.Decimal(sale[self.qty_field])
+		remainder = sale_qty = decimal.Decimal(sale[self.qty_field])
 		asset = sale[self.asset_field]
-		while qty > decimal.Decimal():
+		while remainder > decimal.Decimal():
 			try:
 				last = self[asset].pop(-1)
 				last.setdefault('orig_qty', last[self.qty_field])
 			except IndexError:
 				print(f"Warning! No lots for {asset}", file=sys.stderr)
 				return
-			alloc = min(qty, last[self.qty_field])
+			alloc = min(remainder, last[self.qty_field])
 			last[self.qty_field] -= alloc
-			qty -= alloc
-			amount = alloc / last['orig_qty'] * decimal.Decimal(last[self.amount_field])
+			remainder -= alloc
+			amount = alloc / sale_qty * decimal.Decimal(sale[self.amount_field])
+			basis = alloc / last['orig_qty'] * decimal.Decimal(last[self.amount_field])
 			yield {
 				self.qty_field: alloc,
 				self.date_field: last[self.date_field],
 				self.type_field: f'{sale[self.type_field]} Lot',
-				self.amount_field: amount,
+				self.amount_field: round(amount, 2),
+				self.basis_field: round(basis, 2),
 			}
 			if last[self.qty_field] > decimal.Decimal():
 				self[asset].append(last)
@@ -80,6 +83,6 @@ def run(
 	Resolve sales from transactions using LIFO strategy.
 	"""
 	output.writer.writerows(itertools.islice(input.reader, skip))
-	output.fieldnames = input.fieldnames
+	output.fieldnames = input.fieldnames + [Lots.basis_field]
 	output.writeheader()
 	consume(map(output.writerow, Lots(input)))
