@@ -29,6 +29,7 @@ class Lots(collections.defaultdict):
 
 	def __init__(self, transactions):
 		self.transactions = transactions
+		self.lot_count = itertools.count(1)
 		super().__init__(list)
 
 	def __iter__(self):
@@ -36,8 +37,11 @@ class Lots(collections.defaultdict):
 			yield from self.handle_transaction(transaction)
 
 	def handle_transaction(self, transaction):
+		is_buy = re.match(self.buy_pattern, transaction[self.type_field])
+		if is_buy:
+			transaction['Lot'] = next(self.lot_count)
 		yield dict(transaction)
-		if re.match(self.buy_pattern, transaction[self.type_field]):
+		if is_buy:
 			transaction[self.qty_field] = decimal.Decimal(transaction[self.qty_field])
 			self[transaction[self.asset_field]].append(transaction)
 			return
@@ -62,7 +66,7 @@ class Lots(collections.defaultdict):
 			yield {
 				self.qty_field: alloc,
 				self.date_field: last[self.date_field],
-				self.type_field: f'{sale[self.type_field]} Lot',
+				self.type_field: f'{sale[self.type_field]} Lot {last["Lot"]}',
 				self.amount_field: round(amount, 2),
 				self.basis_field: round(basis, 2),
 			}
@@ -83,6 +87,6 @@ def run(
 	Resolve sales from transactions using LIFO strategy.
 	"""
 	output.writer.writerows(itertools.islice(input.reader, skip))
-	output.fieldnames = input.fieldnames + [Lots.basis_field]
+	output.fieldnames = ['Lot'] + input.fieldnames + [Lots.basis_field]
 	output.writeheader()
 	consume(map(output.writerow, Lots(input)))
