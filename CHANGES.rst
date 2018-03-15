@@ -1,3 +1,9 @@
+1.14
+====
+
+* Added ``jaraco.financial.lilo`` for performing Last In - Last Out
+  analysis of a Coinbase or other CSV report.
+
 1.13
 ====
 
