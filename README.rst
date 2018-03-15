@@ -4,7 +4,10 @@
 .. image:: https://img.shields.io/pypi/pyversions/jaraco.financial.svg
 
 .. image:: https://img.shields.io/travis/jaraco/jaraco.financial/master.svg
-   :target: http://travis-ci.org/jaraco/jaraco.financial
+   :target: https://travis-ci.org/jaraco/jaraco.financial
+
+.. .. image:: https://img.shields.io/appveyor/ci/jaraco/skeleton/master.svg
+..    :target: https://ci.appveyor.com/project/jaraco/skeleton/branch/master
 
 .. image:: https://readthedocs.org/projects/jaracofinancial/badge/?version=latest
    :target: https://jaracofinancial.readthedocs.io/en/latest/?badge=latest
