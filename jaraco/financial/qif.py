@@ -21,7 +21,7 @@ def replace_val(matcher):
 def inline_sub(filename):
 	dat = open(filename).read()
 	# here's the pattern Paypal sends my QIF dates in
-	pattern = '^D\d+/\d+/\d{2,4}$'
+	pattern = r'^D\d+/\d+/\d{2,4}$'
 	pattern = re.compile(pattern, re.MULTILINE)
 	res = pattern.sub(replace_val, dat)
 	open(filename, 'w').write(res)

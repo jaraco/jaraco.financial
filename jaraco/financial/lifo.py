@@ -79,9 +79,9 @@ DictWriter = functools.partial(csv.DictWriter, fieldnames=None)
 
 @autocommand.autocommand(__name__)
 def run(
-	input: compose(csv.DictReader, open)=csv.DictReader(sys.stdin),
-	output: compose(DictWriter, write)=DictWriter(sys.stdout),
-	skip: int=3,
+	input: compose(csv.DictReader, open) = csv.DictReader(sys.stdin),
+	output: compose(DictWriter, write) = DictWriter(sys.stdout),
+	skip: int = 3,
 ):
 	"""
 	Resolve sales from transactions using LIFO strategy.

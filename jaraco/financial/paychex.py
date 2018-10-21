@@ -132,7 +132,7 @@ def footer(ofx):
 
 
 @autocommand.autocommand(__name__)
-def main(csv_filename, ofx_filename, limit: int=None):
+def main(csv_filename, ofx_filename, limit: int = None):
 	"""
 	Create a new OFX file based on the CSV and OFX downloads from
 	PayChex.

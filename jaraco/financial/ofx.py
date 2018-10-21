@@ -46,7 +46,7 @@ def disable_future_warning():
 	warnings.filterwarnings(
 		action="ignore",
 		category=FutureWarning,
-		message="split\(\) requires a non-empty pattern match",
+		message="split() requires a non-empty pattern match",
 	)
 
 
@@ -152,7 +152,7 @@ def get_version_id():
 	like that from our version.
 	"""
 	ver = pkg_resources.require('jaraco.financial')[0].version
-	ver_id = ''.join(re.findall('\d+', ver))
+	ver_id = ''.join(re.findall(r'\d+', ver))
 	# first pad right to three digits (so last two digits are minor/patch ver)
 	ver_id = '{:0<3s}'.format(ver_id)
 	# now pad left to four digits (so first two digits are major ver)
