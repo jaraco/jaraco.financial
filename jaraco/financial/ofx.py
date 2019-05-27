@@ -20,7 +20,6 @@ import pkg_resources
 import ofxparse
 import jaraco.collections
 from jaraco.ui import cmdline
-from jaraco.text import local_format as lf
 import jaraco.logging
 from jaraco.functools import call_aside
 from requests.packages.urllib3.connectionpool import HTTPConnection
@@ -96,12 +95,12 @@ def _load_sites_from_file():
 
 
 def _field(tag, value):
-    return lf('<{tag}>{value}')
+    return f'<{tag}>{value}'
 
 
 def _tag(tag, *contents):
-    start_tag = lf('<{tag}>')
-    end_tag = lf('</{tag}>')
+    start_tag = f'<{tag}>'
+    end_tag = f'</{tag}>'
     lines = itertools.chain([start_tag], contents, [end_tag])
     return '\r\n'.join(lines)
 
@@ -306,7 +305,7 @@ class OFXClient(object):
         content_type = resp.headers['Content-type']
         expected_types = 'application/x-ofx', 'application/qfx'
         if content_type not in expected_types:
-            log.warning(lf('Unexpected content type {content_type}'))
+            log.warning(f'Unexpected content type {content_type}')
 
         with open(name, "wb") as outfile:
             outfile.write(resp.content)
@@ -356,7 +355,7 @@ class Command(cmdline.Command):
     def _get_password(site, username):
         password = keyring.get_password(site, username)
         if password is None:
-            password = getpass.getpass(lf("Password for {site}:{username}: "))
+            password = getpass.getpass(f"Password for {site}:{username}: ")
             keyring.set_password(site, username, password)
         return password
 
