@@ -13,12 +13,16 @@ import os
 import copy
 import decimal
 import datetime
+import logging
 from textwrap import dedent
 
 import autocommand
 import ofxparse
 
 import csv
+
+
+log = logging.getLogger(__name__)
 
 
 def header(ofx):
@@ -143,12 +147,26 @@ def footer(ofx):
     ).strip()
 
 
+def remove_bad(data):
+    """
+    PayChex seems to have other behaviors that yield bad data
+    in the CSV. Log the presence of these rows and exclude
+    them.
+    """
+    for n, row in enumerate(data, start=1):
+        if row['Ticker'] == 'null':
+            log.warning(f"Encountered bad row {n}: {row}")
+            continue
+        yield row
+
+
 @autocommand.autocommand(__name__)
 def main(csv_filename, ofx_filename, limit: int = None):
     """
     Create a new OFX file based on the CSV and OFX downloads from
     PayChex.
     """
+    logging.basicConfig(level=logging.INFO)
     csv_filename = os.path.expanduser(csv_filename)
     ofx_filename = os.path.expanduser(ofx_filename)
     ofx = ofxparse.OfxParser.parse(open(ofx_filename))
@@ -160,7 +178,7 @@ def main(csv_filename, ofx_filename, limit: int = None):
 
     securities = {security.ticker: security for security in ofx.security_list}
 
-    for row in itertools.islice(data, limit):
+    for row in itertools.islice(remove_bad(data), limit):
         for line in to_ofx(row, securities):
             print(line)
 
