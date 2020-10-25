@@ -115,7 +115,7 @@ def footer(ofx):
     Given the original OFX template, extract the securities list.
     """
     yield dedent(
-        f"""
+        """
         </INVTRANLIST>
         </INVSTMTRS>
         </INVSTMTTRNRS>
@@ -139,7 +139,7 @@ def footer(ofx):
             """
         ).strip()
     yield dedent(
-        f"""
+        """
         </SECLIST>
         </SECLISTMSGSRSV1>
         </OFX>
