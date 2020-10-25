@@ -79,8 +79,8 @@ DictWriter = functools.partial(csv.DictWriter, fieldnames=None)
 
 @autocommand.autocommand(__name__)
 def run(
-    input: compose(csv.DictReader, open) = csv.DictReader(sys.stdin),
-    output: compose(DictWriter, write) = DictWriter(sys.stdout),
+    input: compose(csv.DictReader, open) = csv.DictReader(sys.stdin),  # type: ignore
+    output: compose(DictWriter, write) = DictWriter(sys.stdout),  # type: ignore
     skip: int = 3,
 ):
     """
