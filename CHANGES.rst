@@ -1,3 +1,8 @@
+v2.0.1
+======
+
+* Refreshed package metadata.
+
 2.0
 ===
 
