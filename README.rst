@@ -17,6 +17,9 @@
 .. image:: https://readthedocs.org/projects/jaracofinancial/badge/?version=latest
    :target: https://jaracofinancial.readthedocs.io/en/latest/?badge=latest
 
+.. image:: https://img.shields.io/badge/skeleton-2022-informational
+   :target: https://blog.jaraco.com/skeleton
+
 ``jaraco.financial`` implements tools for financial management, particularly
 around Open Financial Exchange and Microsoft Money. These scripts help
 facilitate the continued use of Money using the free, sunset release, by
