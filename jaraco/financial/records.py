@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import smtplib
 import email.mime.multipart
 import email.mime.text
@@ -73,5 +71,5 @@ def send_hashes():
     """
     root = Path('~/Documents').expanduser()
     output = hash_files(root)
-    print("Sending hashes ({length} bytes)".format(length=len(output)))
+    print(f"Sending hashes ({len(output)} bytes)")
     email_message(output, "Document Hashes")

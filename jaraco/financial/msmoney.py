@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals, absolute_import
-
 import argparse
 import subprocess
 import os
@@ -91,15 +89,15 @@ def patch_binary_for_payee_name_crash():
     with dll.open('r+b') as file:
         file.seek(0x3FACE8)
         data = file.read(0xF6 - 0xE8 + 1)
-        assert six.indexbytes(data, 0xE8 - 0xE8) == 0x85
-        assert six.indexbytes(data, 0xED - 0xE8) == 0x50
-        assert six.indexbytes(data, 0xF0 - 0xE8) == 0xFF
-        assert six.indexbytes(data, 0xF6 - 0xE8) == 0xE8
+        assert data[0xE8 - 0xE8] == 0x85
+        assert data[0xED - 0xE8] == 0x50
+        assert data[0xF0 - 0xE8] == 0xFF
+        assert data[0xF6 - 0xE8] == 0xE8
         file.seek(0x3FACE8)
-        file.write(six.int2byte(0x8D))
+        file.write(bytes((0x8D,)))
         file.seek(0x3FACED)
-        file.write(six.int2byte(0x51))
+        file.write(bytes((0x51,)))
         file.seek(0x3FACF0)
-        file.write(six.int2byte(0x85))
+        file.write(bytes((0x85,)))
         file.seek(0x3FACF6)
-        file.write(six.int2byte(0xB9))
+        file.write(bytes((0xB9,)))

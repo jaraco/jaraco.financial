@@ -4,7 +4,7 @@ import datetime
 import jaraco.itertools
 
 
-class Transaction(object):
+class Transaction:
     payee = None
     date = None
     designation = None
@@ -49,7 +49,7 @@ class SplitDesignation(list):
     "A list of SimpleDesignations"
 
 
-class SimpleDesignation(object):
+class SimpleDesignation:
     def __init__(self, descriptor, amount, memo=None):
         self.descriptor = descriptor
         self.amount = amount
@@ -101,9 +101,9 @@ class Ledger(list):
                 break
 
 
-class Named(object):
+class Named:
     def __init__(self, name, *args, **kwargs):
-        super(Named, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.name = name
 
 

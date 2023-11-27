@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals, print_function
-
 import uuid
 import argparse
 import getpass
@@ -152,14 +150,14 @@ def get_version_id():
     ver = metadata.version('jaraco.financial')
     ver_id = ''.join(re.findall(r'\d+', ver))
     # first pad right to three digits (so last two digits are minor/patch ver)
-    ver_id = '{:0<3s}'.format(ver_id)
+    ver_id = f'{ver_id:0<3s}'
     # now pad left to four digits (so first two digits are major ver)
-    ver_id = '{:0>4s}'.format(ver_id)
+    ver_id = f'{ver_id:0>4s}'
     assert len(ver_id) == 4
     return ver_id
 
 
-class OFXClient(object):
+class OFXClient:
     """
     Encapsulate an ofx client, config is a dict containing configuration.
     """
@@ -362,7 +360,7 @@ class Command(cmdline.Command):
 class Query(Command):
     @classmethod
     def add_arguments(cls, parser):
-        parser.add_argument('site', help="One of {0}".format(', '.join(sites)))
+        parser.add_argument('site', help="One of {}".format(', '.join(sites)))
         parser.add_argument('-u', '--username', default=getpass.getuser())
         parser.add_argument('-a', '--account')
         parser.add_argument(

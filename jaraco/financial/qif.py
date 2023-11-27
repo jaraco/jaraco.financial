@@ -44,7 +44,7 @@ def DALS(str):
     return textwrap.dedent(str).lstrip()
 
 
-class Transaction(object):
+class Transaction:
     fmt = DALS(
         """
         !Type:{type}
