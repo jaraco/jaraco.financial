@@ -11,17 +11,18 @@ import inspect
 import json
 import re
 import warnings
+from importlib import resources
+from importlib import metadata
 
 import requests
 import path
 import dateutil.parser
 import keyring
-import pkg_resources
 import ofxparse
 import jaraco.collections
 from jaraco.ui import cmdline
 import jaraco.logging
-from jaraco.functools import call_aside
+from jaraco.functools import invoke
 from requests.packages.urllib3.connectionpool import HTTPConnection
 
 try:
@@ -36,7 +37,7 @@ log = logging.getLogger(__name__)
 sites = dict()
 
 
-@call_aside
+@invoke
 def disable_future_warning():
     """
     Suppress warning as reported at
@@ -71,9 +72,7 @@ def _load_sites_from_entry_points():
     institution details.
     """
 
-    group = 'financial_institutions'
-    entry_points = pkg_resources.iter_entry_points(group=group)
-    for ep in entry_points:
+    for ep in resources.entry_points(group='financial_institutions'):
         try:
             log.info('Loading %s', ep.name)
             detail = ep.load()
@@ -150,7 +149,7 @@ def get_version_id():
     OFX seems to like version ids that look like NNNN, so generate something
     like that from our version.
     """
-    ver = pkg_resources.require('jaraco.financial')[0].version
+    ver = metadata.version('jaraco.financial')
     ver_id = ''.join(re.findall(r'\d+', ver))
     # first pad right to three digits (so last two digits are minor/patch ver)
     ver_id = '{:0<3s}'.format(ver_id)
