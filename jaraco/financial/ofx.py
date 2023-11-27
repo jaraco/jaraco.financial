@@ -23,7 +23,7 @@ import jaraco.collections
 from jaraco.ui import cmdline
 import jaraco.logging
 from jaraco.functools import invoke
-from requests.packages.urllib3.connectionpool import HTTPConnection
+from urllib3.connectionpool import HTTPConnection
 
 try:
     import yaml
