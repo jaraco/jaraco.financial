@@ -18,7 +18,7 @@ def get_login_form():
     username = getpass.getuser()
     return dict(
         Email=username,
-        Password=keyring.get_password('https://link.intuit.com', username)
+        Password=keyring.get_password('https://link.intuit.com', username),
     )
 
 
@@ -44,7 +44,7 @@ def copy_session_cookies(browser):
 
 def filename(resp):
     try:
-        name, = re.findall('filename=(.+)', resp.headers['content-disposition'])
+        (name,) = re.findall('filename=(.+)', resp.headers['content-disposition'])
     except KeyError:
         name = resp.url.split('/')[-1]
     return name
