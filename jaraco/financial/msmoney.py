@@ -5,7 +5,6 @@ import re
 import sys
 import struct
 
-import six
 from path import Path
 
 
