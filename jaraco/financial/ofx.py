@@ -240,52 +240,48 @@ class OFXClient:
         )
 
     def _header(self):
-        return '\r\n'.join(
-            [
-                "OFXHEADER:100",
-                "DATA:OFXSGML",
-                "VERSION:102",
-                "SECURITY:NONE",
-                "ENCODING:USASCII",
-                "CHARSET:1252",
-                "COMPRESSION:NONE",
-                "OLDFILEUID:NONE",
-                "NEWFILEUID:" + _genuuid(),
-                "",
-            ]
-        )
+        return '\r\n'.join([
+            "OFXHEADER:100",
+            "DATA:OFXSGML",
+            "VERSION:102",
+            "SECURITY:NONE",
+            "ENCODING:USASCII",
+            "CHARSET:1252",
+            "COMPRESSION:NONE",
+            "OLDFILEUID:NONE",
+            "NEWFILEUID:" + _genuuid(),
+            "",
+        ])
 
     def baQuery(self, bankid, acctid, dtstart, accttype):
         """Bank account statement request"""
-        return '\r\n'.join(
-            [
-                self._header(),
-                _tag(
-                    "OFX",
-                    self.sign_on(),
-                    self._bareq(bankid, acctid, dtstart, accttype),
-                ),
-            ]
-        )
+        return '\r\n'.join([
+            self._header(),
+            _tag(
+                "OFX",
+                self.sign_on(),
+                self._bareq(bankid, acctid, dtstart, accttype),
+            ),
+        ])
 
     def ccQuery(self, acctid, dtstart):
         """CC Statement request"""
-        return '\r\n'.join(
-            [self._header(), _tag("OFX", self.sign_on(), self._ccreq(acctid, dtstart))]
-        )
+        return '\r\n'.join([
+            self._header(),
+            _tag("OFX", self.sign_on(), self._ccreq(acctid, dtstart)),
+        ])
 
     def acctQuery(self, dtstart):
-        return '\r\n'.join(
-            [self._header(), _tag("OFX", self.sign_on(), self._acctreq(dtstart))]
-        )
+        return '\r\n'.join([
+            self._header(),
+            _tag("OFX", self.sign_on(), self._acctreq(dtstart)),
+        ])
 
     def invstQuery(self, brokerid, acctid, dtstart):
-        return '\r\n'.join(
-            [
-                self._header(),
-                _tag("OFX", self.sign_on(), self._invstreq(brokerid, acctid, dtstart)),
-            ]
-        )
+        return '\r\n'.join([
+            self._header(),
+            _tag("OFX", self.sign_on(), self._invstreq(brokerid, acctid, dtstart)),
+        ])
 
     def doQuery(self, query, name):
         headers = {
