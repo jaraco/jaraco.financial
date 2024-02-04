@@ -1,7 +1,7 @@
-import pathlib
-
 import autocommand
 import dateutil.parser
+
+from .compat.py38 import pathlib
 
 
 def clean_name(orig):
