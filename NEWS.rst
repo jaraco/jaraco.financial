@@ -1,3 +1,12 @@
+v2.2.0
+======
+
+Features
+--------
+
+- Added routine to rename apple card transactions to a name that sorts nicely.
+
+
 v2.1.0
 ======
 
