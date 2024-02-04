@@ -1,7 +1,6 @@
-import pathlib
-
 import autocommand
 import dateutil.parser
+import path
 
 
 def clean_name(orig):
@@ -11,7 +10,7 @@ def clean_name(orig):
     >>> str(clean_name('root/Apple Card Transactions - July 2022.ofx'))
     'root/2022-07.ofx'
     """
-    orig = pathlib.Path(orig)
+    orig = path.Path(orig)
     leader, sep, date = orig.stem.partition(' - ')
     parsed = dateutil.parser.parse(date)
     return orig.with_stem(parsed.strftime('%Y-%m'))
@@ -25,5 +24,5 @@ def rename_all(dir):
 
 
 @autocommand.autocommand(__name__)
-def run(root=pathlib.Path()):
+def run(root=path.Path()):
     rename_all(root)
