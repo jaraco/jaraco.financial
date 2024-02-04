@@ -1,0 +1,1 @@
+Added routine to rename apple card transactions to a name that sorts nicely.
