@@ -39,19 +39,11 @@ Source = "https://github.com/jaraco/jaraco.financial"
 test = [
 	# upstream
 	"pytest >= 6, != 8.1.*",
-	"pytest-checkdocs >= 2.4",
-	"pytest-cov",
-	"pytest-mypy",
-	"pytest-enabler >= 2.2",
-	"pytest-ruff >= 0.2.1; sys_platform != 'cygwin'",
 
 	# local
 	"splinter",
-	"types-python-dateutil",
-	"types-requests",
-	"types-PyYAML",
-	"types-six",
 ]
+
 doc = [
 	# upstream
 	"sphinx >= 3.5",
@@ -62,6 +54,31 @@ doc = [
 
 	# local
 ]
+
+check = [
+	"pytest-checkdocs >= 2.4",
+	"pytest-ruff >= 0.2.1; sys_platform != 'cygwin'",
+]
+
+cover = [
+	"pytest-cov",
+]
+
+enabler = [
+	"pytest-enabler >= 2.2",
+]
+
+type = [
+	# upstream
+	"pytest-mypy",
+
+	# local
+	"types-python-dateutil",
+	"types-requests",
+	"types-PyYAML",
+	"types-six",
+]
+
 
 [project.scripts]
 fix-qif-date-format = "jaraco.financial.qif:fix_dates_cmd"
