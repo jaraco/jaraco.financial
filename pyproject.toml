@@ -87,4 +87,9 @@ ofx = "jaraco.financial.ofx:handle_command_line"
 clean-msmoney-temp = "jaraco.financial.msmoney:clean_temp"
 record-document-hashes = "jaraco.financial.records:send_hashes"
 
+
 [tool.setuptools_scm]
+
+
+[tool.pytest-enabler.mypy]
+# Disabled due to jaraco/skeleton#143
