@@ -437,13 +437,12 @@ class DownloadAll(Accounts, Command):
             '--launch',
             default=False,
             action="store_true",
-            help="Launch the downloaded file in MS " "Money (implies validate).",
+            help="Launch the downloaded file in MS Money (implies validate).",
         )
         parser.add_argument(
             '-k',
             '--like',
-            help="Only download the accounts "
-            "whose names are like the supplied string.",
+            help="Only download the accounts whose names are like the supplied string.",
             default=cls.load_accounts(),
             type=cls.matching_accounts,
             dest='accounts',
