@@ -8,6 +8,8 @@ proper OFX file suitable for importing into your favorite
 accounting system.
 """
 
+from __future__ import annotations
+
 import copy
 import csv
 import datetime
@@ -16,7 +18,6 @@ import itertools
 import logging
 import os
 from textwrap import dedent
-from typing import Optional
 
 import autocommand
 import ofxparse
@@ -160,7 +161,7 @@ def remove_bad(data):
 
 
 @autocommand.autocommand(__name__)
-def main(csv_filename, ofx_filename, limit: Optional[int] = None):
+def main(csv_filename, ofx_filename, limit: int | None = None):
     """
     Create a new OFX file based on the CSV and OFX downloads from
     PayChex.
