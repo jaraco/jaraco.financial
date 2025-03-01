@@ -1,5 +1,4 @@
 import argparse
-import collections
 import datetime
 import getpass
 import inspect
@@ -7,6 +6,7 @@ import itertools
 import json
 import logging
 import re
+import typing
 import uuid
 import warnings
 from importlib import metadata, resources
@@ -110,7 +110,9 @@ def _genuuid():
     return uuid.uuid4().hex
 
 
-AppInfo = collections.namedtuple('AppInfo', 'id version')
+class AppInfo(typing.NamedTuple):
+    id: str
+    version: str
 
 
 def handle_response(resp):
