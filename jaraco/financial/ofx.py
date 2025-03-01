@@ -76,7 +76,7 @@ def _load_sites_from_entry_points():
             detail = ep.load()
             sites.update(detail)
         except Exception:
-            log.exception("Error initializing institution %s." % ep)
+            log.exception(f"Error initializing institution {ep}.")
 
 
 def _load_sites_from_file():
@@ -452,13 +452,9 @@ class DownloadAll(Accounts, Command):
 
     @classmethod
     def run(cls, args):
-        print(
-            'Matching {}/{} accounts'.format(
-                len(args.accounts), len(cls.load_accounts())
-            )
-        )
+        print(f'Matching {len(args.accounts)}/{len(cls.load_accounts())} accounts')
         for account in args.accounts:
-            log.info('Downloading %(institution)s (%(account)s)' % account)
+            log.info('Downloading {institution} ({account})'.format(**account))
             username = account.get('username', getpass.getuser())
             site = account['institution']
             creds = username, cls._get_password(site, username)
