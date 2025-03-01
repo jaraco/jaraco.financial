@@ -1,14 +1,14 @@
 __requires__ = ['splinter[selenium3]', 'autocommand', 'keyring', 'requests']
 
 
-import re
 import getpass
+import re
 import urllib.parse
 
-import splinter
 import autocommand
 import keyring
 import requests
+import splinter
 
 url = 'https://itsdeductibleonline.intuit.com'
 session = requests.session()

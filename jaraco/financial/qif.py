@@ -1,6 +1,6 @@
 import re
-import time
 import textwrap
+import time
 
 from jaraco.collections import DictAdapter
 

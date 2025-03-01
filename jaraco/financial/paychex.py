@@ -8,20 +8,18 @@ proper OFX file suitable for importing into your favorite
 accounting system.
 """
 
-import itertools
-import os
 import copy
-import decimal
+import csv
 import datetime
+import decimal
+import itertools
 import logging
+import os
 from textwrap import dedent
 from typing import Optional
 
 import autocommand
 import ofxparse
-
-import csv
-
 
 log = logging.getLogger(__name__)
 

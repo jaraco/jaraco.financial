@@ -1,11 +1,12 @@
-import smtplib
+import codecs
 import email.mime.multipart
 import email.mime.text
 import getpass
 import io
-import codecs
+import smtplib
 
 from path import Path
+
 from jaraco.ui import progress
 
 

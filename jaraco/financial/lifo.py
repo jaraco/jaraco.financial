@@ -2,18 +2,18 @@
 Resolve sales from transactions using LIFO
 """
 
-import sys
-import csv
-import functools
-import re
-import decimal
-import itertools
 import collections
+import csv
+import decimal
+import functools
+import itertools
+import re
+import sys
+
+import autocommand
+from more_itertools.recipes import consume
 
 from jaraco.functools import compose
-from more_itertools.recipes import consume
-import autocommand
-
 
 write = functools.partial(open, 'w')
 

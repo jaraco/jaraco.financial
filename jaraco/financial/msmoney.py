@@ -1,9 +1,9 @@
 import argparse
-import subprocess
 import os
 import re
-import sys
 import struct
+import subprocess
+import sys
 
 from path import Path
 

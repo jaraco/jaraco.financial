@@ -1,27 +1,27 @@
-import uuid
 import argparse
-import getpass
-import itertools
 import collections
 import datetime
-import logging
+import getpass
 import inspect
+import itertools
 import json
+import logging
 import re
+import uuid
 import warnings
-from importlib import resources
-from importlib import metadata
+from importlib import metadata, resources
 
-import requests
-import path
 import dateutil.parser
 import keyring
 import ofxparse
+import path
+import requests
+from urllib3.connectionpool import HTTPConnection
+
 import jaraco.collections
-from jaraco.ui import cmdline
 import jaraco.logging
 from jaraco.functools import invoke
-from urllib3.connectionpool import HTTPConnection
+from jaraco.ui import cmdline
 
 try:
     import yaml
