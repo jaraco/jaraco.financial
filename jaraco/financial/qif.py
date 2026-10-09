@@ -69,4 +69,4 @@ class InvestmentTransaction(Transaction):
     )
 
     def qif_str(self):
-        return self.fmt.format(self._as_mapping())
+        return self.fmt.format_map(self._as_mapping())
