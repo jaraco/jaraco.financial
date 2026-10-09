@@ -15,7 +15,7 @@ from more_itertools.recipes import consume
 
 from jaraco.functools import compose
 
-write = functools.partial(open, 'w')
+write = functools.partial(open, mode='w')
 
 
 class Lots(collections.defaultdict):
