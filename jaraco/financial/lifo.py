@@ -11,9 +11,8 @@ import re
 import sys
 
 import autocommand
-from more_itertools.recipes import consume
-
 from jaraco.functools import compose
+from more_itertools.recipes import consume
 
 write = functools.partial(open, 'w')
 

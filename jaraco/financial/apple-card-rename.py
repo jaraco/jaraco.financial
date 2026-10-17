@@ -11,7 +11,7 @@ def clean_name(orig):
     'root/2022-07.ofx'
     """
     orig = path.Path(orig)
-    leader, sep, date = orig.stem.partition(' - ')
+    _, _, date = orig.stem.partition(' - ')
     parsed = dateutil.parser.parse(date)
     return orig.with_stem(parsed.strftime('%Y-%m'))
 

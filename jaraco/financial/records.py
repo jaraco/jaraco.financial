@@ -5,9 +5,8 @@ import getpass
 import io
 import smtplib
 
-from path import Path
-
 from jaraco.ui import progress
+from path import Path
 
 
 def email_message(body_text, subject=None):

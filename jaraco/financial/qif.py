@@ -1,3 +1,4 @@
+import pathlib
 import re
 import textwrap
 import time
@@ -20,19 +21,17 @@ def replace_val(matcher):
 
 
 def inline_sub(filename):
-    dat = open(filename).read()
+    path = pathlib.Path(filename)
     # here's the pattern Paypal sends my QIF dates in
-    pattern = r'^D\d+/\d+/\d{2,4}$'
-    pattern = re.compile(pattern, re.MULTILINE)
-    res = pattern.sub(replace_val, dat)
-    open(filename, 'w').write(res)
+    pattern = re.compile(r'^D\d+/\d+/\d{2,4}$', re.MULTILINE)
+    path.write_text(pattern.sub(replace_val, path.read_text()))
 
 
 def fix_dates_cmd():
     from optparse import OptionParser
 
     parser = OptionParser(usage="%prog filename")
-    options, args = parser.parse_args()
+    _, args = parser.parse_args()
     filename = args.pop()
     if args:
         parser.error("Unexpected parameter")

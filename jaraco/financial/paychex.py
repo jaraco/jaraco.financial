@@ -169,18 +169,20 @@ def main(csv_filename, ofx_filename, limit: int | None = None):
     logging.basicConfig(level=logging.INFO)
     csv_filename = os.path.expanduser(csv_filename)
     ofx_filename = os.path.expanduser(ofx_filename)
-    ofx = ofxparse.OfxParser.parse(open(ofx_filename))
+    with open(ofx_filename) as ofx_file:
+        ofx = ofxparse.OfxParser.parse(ofx_file)
     for line in header(ofx):
         print(line)
     dialect = copy.copy(csv.excel)
     dialect.skipinitialspace = True
-    data = csv.DictReader(open(csv_filename), dialect=dialect)
 
     securities = {security.ticker: security for security in ofx.security_list}
 
-    for row in itertools.islice(remove_bad(data), limit):
-        for line in to_ofx(row, securities):
-            print(line)
+    with open(csv_filename) as csv_file:
+        data = csv.DictReader(csv_file, dialect=dialect)
+        for row in itertools.islice(remove_bad(data), limit):
+            for line in to_ofx(row, securities):
+                print(line)
 
     for line in footer(ofx):
         print(line)

@@ -15,7 +15,9 @@ class Transaction:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
         if 'date' not in vars(self):
-            self.date = datetime.datetime.utcnow()
+            self.date = datetime.datetime.now(datetime.timezone.utc).replace(
+                tzinfo=None
+            )
 
     def get_amount(self, descriptor=None):
         """

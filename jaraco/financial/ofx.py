@@ -12,16 +12,15 @@ import warnings
 from importlib import metadata, resources
 
 import dateutil.parser
+import jaraco.collections
+import jaraco.logging
 import keyring
 import ofxparse
 import path
 import requests
-from urllib3.connectionpool import HTTPConnection
-
-import jaraco.collections
-import jaraco.logging
 from jaraco.functools import invoke
 from jaraco.ui import cmdline
+from urllib3.connectionpool import HTTPConnection
 
 try:
     import yaml
@@ -32,7 +31,7 @@ from . import msmoney
 
 log = logging.getLogger(__name__)
 
-sites = dict()
+sites = {}
 
 
 @invoke
@@ -103,7 +102,7 @@ def _tag(tag, *contents):
 
 
 def _date():
-    return datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d%H%M%S")
 
 
 def _genuuid():
